@@ -15,12 +15,7 @@
   <section id="landing" class="landing">
     <nav class="landing-nav">
       <div class="logo">
-        <div class="logo-mark">
-          <svg viewBox="0 0 40 40" width="32" height="32">
-            <path d="M20 2 A18 18 0 1 0 20 38 A18 18 0 0 1 20 2" fill="#3a2b7a"/>
-            <path d="M14 22 C 18 26, 22 24, 26 18 L 32 12 L 28 14 L 22 20 C 18 22, 16 20, 14 22 Z" fill="#6a4cff"/>
-          </svg>
-        </div>
+        <span class="brand-logo-wrap" aria-hidden="true"><img class="brand-logo" src="assets/logo.jpeg" alt=""></span>
         <span>CareerFlow <b>AI</b></span>
       </div>
       <ul class="nav-links">
@@ -113,12 +108,7 @@
   <div id="app" class="app hidden">
     <aside class="sidebar">
       <div class="logo small">
-        <div class="logo-mark">
-          <svg viewBox="0 0 40 40" width="26" height="26">
-            <path d="M20 2 A18 18 0 1 0 20 38 A18 18 0 0 1 20 2" fill="#3a2b7a"/>
-            <path d="M14 22 C 18 26, 22 24, 26 18 L 32 12 L 28 14 L 22 20 C 18 22, 16 20, 14 22 Z" fill="#6a4cff"/>
-          </svg>
-        </div>
+        <span class="brand-logo-wrap" aria-hidden="true"><img class="brand-logo" src="assets/logo.jpeg" alt=""></span>
         <span>CareerFlow <b>AI</b></span>
       </div>
 
@@ -209,6 +199,20 @@
               <h4>Projects</h4>
               <ul id="p-proj" class="clean-list"></ul>
             </div>
+            <details class="profile-edit"><summary>Edit profile details</summary>
+              <label>Name<input id="edit-name" type="text" maxlength="120" /></label>
+              <label>Skills (comma separated)<textarea id="edit-skills" rows="3"></textarea></label>
+              <label>Experience (one entry per line)<textarea id="edit-experience" rows="3"></textarea></label>
+              <label>Education (one entry per line)<textarea id="edit-education" rows="2"></textarea></label>
+              <label>Projects (one per line)<textarea id="edit-projects" rows="3"></textarea></label>
+              <label>Certifications (one per line)<textarea id="edit-certifications" rows="2"></textarea></label>
+              <label>Location<input id="edit-location" type="text" maxlength="160" /></label>
+              <label>Career level<select id="edit-level"><option>Entry</option><option>Mid</option><option>Senior</option></select></label>
+              <button type="button" class="btn-primary" onclick="saveEditedProfile()">Save profile</button>
+              <span id="profileSaveStatus" class="muted" aria-live="polite"></span>
+            </details>
+            <button class="btn-ghost" onclick="improveResume()">Get role-specific resume suggestions</button>
+            <div id="improveOutput" class="suggestion-list"></div>
             <button class="btn-primary" onclick="navigate('jobs')">Continue → Explore Jobs</button>
           </div>
         </section>
@@ -217,7 +221,8 @@
         <section id="page-jobs" class="page">
           <div class="panel">
             <h3>Recommended Jobs</h3>
-            <p class="muted">Ranked by hybrid matching (skills + semantic + eligibility).</p>
+            <p class="muted">Ranked with transparent skills, profile-similarity, eligibility, and location weights. Curated sample roles; current vacancies are not verified.</p>
+            <label class="job-search-label">Filter recommended roles<input id="jobSearch" type="search" placeholder="Search title, company, or skill" /></label>
             <div id="jobList" class="job-list"></div>
           </div>
         </section>
@@ -227,6 +232,7 @@
           <div class="panel">
             <h3>Skill Gap Analysis</h3>
             <p class="muted">Target role: <b id="target-role-label">—</b></p>
+            <p class="muted">Skills marked as priority gaps are requirements not demonstrated in the profile you provided.</p>
             <div class="gap-grid">
               <div class="gap-col">
                 <h4 class="ok">✓ Already Have</h4>
@@ -271,6 +277,8 @@
               </div>
             </div>
             <div id="interview-feedback" class="feedback hidden"></div>
+            <div class="panel interview-history"><h4>Recent practice</h4><div id="interview-history-list" class="muted">No interview sessions yet.</div></div>
+            <p class="muted">Interview feedback is practice guidance, not an official hiring assessment.</p>
           </div>
         </section>
 

@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+# Local runtime data
+backend/app/data/*.db
+backend/app/data/chroma/
+backend/app/.env

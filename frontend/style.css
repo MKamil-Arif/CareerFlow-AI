@@ -54,9 +54,12 @@ b { font-weight: 700; }
 .btn-ghost.sm { padding: 8px 14px; font-size: 13px; width: 100%; }
 
 /* ============ LOGO ============ */
-.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
+.logo { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; white-space: nowrap; }
 .logo b { color: var(--purple); }
-.logo-mark { display: flex; }
+.brand-logo-wrap { position: relative; display: block; width: 44px; height: 44px; flex: 0 0 44px; overflow: hidden; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(58, 43, 122, .12); }
+.brand-logo { position: absolute; display: block; width: 140px; max-width: none; height: auto; left: -48px; top: -31px; }
+.logo.small .brand-logo-wrap { width: 36px; height: 36px; flex-basis: 36px; border-radius: 10px; }
+.logo.small .brand-logo { width: 112px; left: -38px; top: -25px; }
 .logo.small { font-size: 17px; padding: 4px 0 20px; }
 
 /* ============ LANDING ============ */
@@ -278,3 +281,19 @@ b { font-weight: 700; }
   .gap-grid { grid-template-columns: 1fr; }
   .content { padding: 20px; }
 }
+.profile-edit { margin: 18px 0; padding: 16px; border: 1px solid var(--border); border-radius: 10px; }
+.profile-edit summary { cursor: pointer; font-weight: 600; color: var(--purple); margin-bottom: 14px; }
+.profile-edit label, .job-search-label { display: block; margin: 12px 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+.profile-edit input, .profile-edit textarea, .profile-edit select, .job-search-label input { display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; color: var(--text); background: #fff; }
+.profile-edit textarea { resize: vertical; }
+.resource-link { display: inline-block; margin-top: 8px; color: var(--purple); font-size: 13px; font-weight: 600; }
+.interview-history { margin: 20px 0 0; box-shadow: none; }
+.history-row { padding: 10px 0; border-top: 1px solid var(--border); }
+.history-row span { float: right; color: var(--muted); font-size: 12px; }
+.history-row p { margin-top: 4px; font-size: 13px; }
+.suggestion-list { margin-top: 14px; }
+@media (max-width: 600px) { .hero-cta { flex-direction: column; } .job-head { gap: 12px; } .interview-actions { flex-wrap: wrap; } }
+
+.score-details { margin-top: 14px; font-size: 13px; }
+.score-details summary { cursor: pointer; color: var(--purple); font-weight: 600; }
+.score-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; padding: 10px 0; text-transform: capitalize; }

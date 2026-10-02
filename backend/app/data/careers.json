@@ -1,0 +1,36 @@
+[
+  {
+    "id": "frontend",
+    "title": "Frontend Developer",
+    "responsibilities": "Build accessible web interfaces, connect APIs, and maintain responsive UI.",
+    "skills": [
+      "JavaScript",
+      "React",
+      "HTML",
+      "CSS",
+      "Git"
+    ]
+  },
+  {
+    "id": "backend",
+    "title": "Backend Developer",
+    "responsibilities": "Design APIs, validate data, work with databases, and maintain server-side services.",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "SQL",
+      "Git"
+    ]
+  },
+  {
+    "id": "analyst",
+    "title": "Data Analyst",
+    "responsibilities": "Query, validate, analyze, and communicate findings from business datasets.",
+    "skills": [
+      "SQL",
+      "Excel",
+      "Python",
+      "Pandas"
+    ]
+  }
+]

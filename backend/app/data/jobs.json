@@ -4,44 +4,158 @@
     "title": "Junior Frontend Developer",
     "company": "TechNova",
     "location": "Lahore (Remote)",
-    "required_skills": ["JavaScript", "React", "HTML", "CSS", "Git"],
-    "preferred_skills": ["TypeScript", "Next.js"],
-    "description": "Build modern web interfaces using React and TypeScript."
+    "required_skills": [
+      "JavaScript",
+      "React",
+      "HTML",
+      "CSS",
+      "Git"
+    ],
+    "preferred_skills": [
+      "TypeScript",
+      "Next.js"
+    ],
+    "description": "Build modern web interfaces using React and TypeScript.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
   },
   {
     "id": 2,
     "title": "React Developer",
     "company": "PixelWorks",
     "location": "Karachi (Hybrid)",
-    "required_skills": ["JavaScript", "React", "Git", "REST APIs"],
-    "preferred_skills": ["Redux", "Jest"],
-    "description": "Develop and maintain React applications in a fast-paced team."
+    "required_skills": [
+      "JavaScript",
+      "React",
+      "Git",
+      "REST APIs"
+    ],
+    "preferred_skills": [
+      "Redux",
+      "Jest"
+    ],
+    "description": "Develop and maintain React applications in a fast-paced team.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
   },
   {
     "id": 3,
     "title": "Data Analyst (Entry)",
     "company": "InsightHub",
     "location": "Islamabad",
-    "required_skills": ["Python", "SQL", "Excel"],
-    "preferred_skills": ["Pandas", "Power BI"],
-    "description": "Analyze business data and produce actionable insights."
+    "required_skills": [
+      "Python",
+      "SQL",
+      "Excel"
+    ],
+    "preferred_skills": [
+      "Pandas",
+      "Power BI"
+    ],
+    "description": "Analyze business data and produce actionable insights.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
   },
   {
     "id": 4,
     "title": "Backend Developer (Python)",
     "company": "CloudMint",
     "location": "Remote",
-    "required_skills": ["Python", "FastAPI", "SQL", "Git"],
-    "preferred_skills": ["Docker", "PostgreSQL"],
-    "description": "Build scalable backend services with Python and FastAPI."
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "SQL",
+      "Git"
+    ],
+    "preferred_skills": [
+      "Docker",
+      "PostgreSQL"
+    ],
+    "description": "Build scalable backend services with Python and FastAPI.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
   },
   {
     "id": 5,
     "title": "Full Stack Developer",
     "company": "StackFlow",
     "location": "Lahore",
-    "required_skills": ["JavaScript", "React", "Node.js", "SQL"],
-    "preferred_skills": ["TypeScript", "Docker"],
-    "description": "Work across frontend and backend to ship features end-to-end."
+    "required_skills": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "SQL"
+    ],
+    "preferred_skills": [
+      "TypeScript",
+      "Docker"
+    ],
+    "description": "Work across frontend and backend to ship features end-to-end.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 6,
+    "title": "Junior Python Developer",
+    "company": "CareerFlow Sample",
+    "location": "Remote",
+    "required_skills": [
+      "Python",
+      "Git",
+      "REST APIs"
+    ],
+    "preferred_skills": [
+      "FastAPI",
+      "PostgreSQL"
+    ],
+    "description": "Curated example role involving Python APIs, code review, and small feature delivery.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 7,
+    "title": "Junior Data Analyst",
+    "company": "CareerFlow Sample",
+    "location": "Lahore (Hybrid)",
+    "required_skills": [
+      "SQL",
+      "Excel",
+      "Python"
+    ],
+    "preferred_skills": [
+      "Pandas",
+      "Power BI"
+    ],
+    "description": "Curated example role supporting reporting, data quality checks, and clear business summaries.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified"
   }
 ]

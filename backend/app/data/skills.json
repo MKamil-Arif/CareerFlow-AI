@@ -1,1 +1,61 @@
-[]
+[
+  {
+    "id": "python",
+    "name": "Python",
+    "definition": "General-purpose programming language used for scripting, APIs, and data workflows.",
+    "prerequisites": [
+      "Programming fundamentals"
+    ],
+    "roles": [
+      "Backend Developer",
+      "Data Analyst"
+    ]
+  },
+  {
+    "id": "sql",
+    "name": "SQL",
+    "definition": "Query and manage structured relational data.",
+    "prerequisites": [
+      "Basic data concepts"
+    ],
+    "roles": [
+      "Data Analyst",
+      "Backend Developer"
+    ]
+  },
+  {
+    "id": "react",
+    "name": "React",
+    "definition": "JavaScript library for building component-based user interfaces.",
+    "prerequisites": [
+      "JavaScript",
+      "HTML"
+    ],
+    "roles": [
+      "Frontend Developer"
+    ]
+  },
+  {
+    "id": "git",
+    "name": "Git",
+    "definition": "Version control for tracking and collaborating on code changes.",
+    "prerequisites": [
+      "Command line basics"
+    ],
+    "roles": [
+      "Software Developer"
+    ]
+  },
+  {
+    "id": "fastapi",
+    "name": "FastAPI",
+    "definition": "Python framework for building typed HTTP APIs.",
+    "prerequisites": [
+      "Python",
+      "HTTP basics"
+    ],
+    "roles": [
+      "Backend Developer"
+    ]
+  }
+]

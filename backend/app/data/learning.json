@@ -1,0 +1,44 @@
+[
+  {
+    "id": "python_tutorial",
+    "title": "Python Tutorial",
+    "skill": "Python",
+    "source_url": "https://docs.python.org/3/tutorial/",
+    "source": "Official Python documentation"
+  },
+  {
+    "id": "js_guide",
+    "title": "JavaScript Guide",
+    "skill": "JavaScript",
+    "source_url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
+    "source": "MDN"
+  },
+  {
+    "id": "react_learn",
+    "title": "Learn React",
+    "skill": "React",
+    "source_url": "https://react.dev/learn",
+    "source": "Official React documentation"
+  },
+  {
+    "id": "sql_lite",
+    "title": "SQL Language",
+    "skill": "SQL",
+    "source_url": "https://www.sqlite.org/lang.html",
+    "source": "SQLite documentation"
+  },
+  {
+    "id": "html",
+    "title": "HTML learning area",
+    "skill": "HTML",
+    "source_url": "https://developer.mozilla.org/en-US/docs/Learn/HTML",
+    "source": "MDN"
+  },
+  {
+    "id": "css",
+    "title": "CSS learning area",
+    "skill": "CSS",
+    "source_url": "https://developer.mozilla.org/en-US/docs/Learn/CSS",
+    "source": "MDN"
+  }
+]

@@ -5,7 +5,7 @@
    ============================================================ */
 
 // ---------- CONFIG ----------
-const API_BASE = window.CAREERFLOW_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = window.CAREERFLOW_API_BASE || (window.location.port === "5500" || window.location.protocol === "file:" ? "http://127.0.0.1:8000" : window.location.origin);
 
 // ---------- GLOBAL STATE ----------
 const appState = {
@@ -14,11 +14,14 @@ const appState = {
   targetJob: null,
   skillGap: null,
   learningPlan: null,
+  planId: null,
   interviewSession: {
     questions: [],
     current: -1,
-    evaluations: []
-  }
+    evaluations: [],
+    sessionId: null
+  },
+  completedPlan: []
 };
 
 function saveState() {
@@ -90,7 +93,7 @@ function navigate(page) {
   if (page === "jobs") loadJobs();
   if (page === "skills") loadSkillGap();
   if (page === "learning") loadPlan();
-  if (page === "interview") renderInterviewState();
+  if (page === "interview") { renderInterviewState(); loadInterviewHistory(); }
 }
 
 document.querySelectorAll(".nav-item").forEach(item => {
@@ -144,7 +147,7 @@ function loadDashboard() {
     : "—";
 
   const planTotal = appState.learningPlan?.length || 0;
-  const planDone = document.querySelectorAll(".plan-item input:checked").length;
+  const planDone = appState.completedPlan?.length || document.querySelectorAll(".plan-item input:checked").length;
   document.getElementById("stat-plan").textContent = planTotal
     ? `${planDone}/${planTotal}`
     : "—";
@@ -245,8 +248,13 @@ async function handleFile(file) {
 }
 
 function renderProfile(p) {
+  populateProfileEditor(p);
   const box = document.getElementById("profileResult");
   box.classList.remove("hidden");
+
+  document.getElementById("p-name").textContent = [p.name || "Name not detected", p.career_level || "Entry level"].join(" · ");
+  document.getElementById("p-location").textContent = p.location ? "Location: " + p.location : "Location not detected";
+  document.getElementById("p-certs").innerHTML = (p.certifications && p.certifications.length) ? p.certifications.map(c => `<li>${escapeHtml(c)}</li>`).join("") : "<li>No certifications detected</li>";
 
   document.getElementById("p-skills").innerHTML =
     (p.skills && p.skills.length)
@@ -300,7 +308,7 @@ async function loadJobs() {
     renderJobs(appState.matchedJobs);
     loadDashboard();
   } catch (err) {
-    list.innerHTML = `<p class="muted">❌ Failed to load jobs: ${err.message}</p>`;
+    list.innerHTML = `<p class="muted">❌ Failed to load jobs: ${escapeHtml(err.message)}</p>`;
   }
 }
 
@@ -329,6 +337,7 @@ function renderJobs(jobs) {
         ${(j.missing || []).map(s => `<span class="chip bad">✗ ${escapeHtml(s)}</span>`).join("")}
       </div>
       ${j.explain ? `<p class="job-explain">${escapeHtml(j.explain)}</p>` : ""}
+      <details class="score-details"><summary>Score breakdown · sample role</summary><div class="score-grid">${Object.entries(j.score_breakdown || {}).map(([k,v]) => `<span>${escapeHtml(k.replaceAll("_"," "))}</span><b>${v}</b>`).join("")}</div><p class="muted">${escapeHtml(j.status || "Curated example; vacancy status not verified")}</p></details>
       <div class="job-actions">
         <button class="btn-primary" onclick="selectJob(${j.id})">Target This Role</button>
       </div>
@@ -342,6 +351,8 @@ function selectJob(jobId) {
   appState.targetJob = job;
   appState.skillGap = null;
   appState.learningPlan = null;
+  appState.planId = null;
+  appState.completedPlan = [];
   saveState();
   navigate("skills");
 }
@@ -398,7 +409,7 @@ async function loadSkillGap() {
 
     loadDashboard();
   } catch (err) {
-    haveEl.innerHTML = `<span class="muted">❌ ${err.message}</span>`;
+    haveEl.innerHTML = `<span class="muted">❌ ${escapeHtml(err.message)}</span>`;
   }
 }
 
@@ -436,7 +447,7 @@ async function improveResume() {
       </div>
     `).join("") || "<p class='muted'>No suggestions generated.</p>";
   } catch (err) {
-    out.innerHTML = `<p class="muted">❌ ${err.message}</p>`;
+    out.innerHTML = `<p class="muted">❌ ${escapeHtml(err.message)}</p>`;
   }
 }
 
@@ -457,6 +468,8 @@ async function loadPlan() {
   list.innerHTML = `<p class="muted">⏳ Generating your personalized plan...</p>`;
 
   try {
+    const saved = await fetch(`${API_BASE}/api/learning-plan?job_id=${appState.targetJob.id}`);
+    if (saved.ok) { const prior=await saved.json(); appState.planId=prior.id; appState.learningPlan=prior.plan; appState.completedPlan=(prior.plan||[]).map((p,i)=>p.completed?i:null).filter(i=>i!==null); saveState(); renderPlan(prior.plan); return; }
     const res = await fetch(`${API_BASE}/api/learning-plan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -469,10 +482,12 @@ async function loadPlan() {
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     appState.learningPlan = data.plan;
+    appState.planId = data.plan_id;
+    appState.completedPlan = (data.plan || []).map((p,i)=>p.completed?i:null).filter(i=>i!==null);
     saveState();
     renderPlan(data.plan);
   } catch (err) {
-    list.innerHTML = `<p class="muted">❌ Failed to generate plan: ${err.message}</p>`;
+    list.innerHTML = `<p class="muted">❌ Failed to generate plan: ${escapeHtml(err.message)}</p>`;
   }
 }
 
@@ -485,19 +500,22 @@ function renderPlan(plan) {
 
   list.innerHTML = plan.map((p, i) => `
     <div class="plan-item">
-      <input type="checkbox" id="task-${i}" onchange="updatePlanProgress()" />
+      <input type="checkbox" id="task-${i}" ${appState.completedPlan.includes(i) ? "checked" : ""} onchange="updatePlanProgress(${i})" />
       <div>
         <div class="day">${escapeHtml(p.day || "Day " + (i + 1))}</div>
         <h5>${escapeHtml(p.title || "")}</h5>
         <p>${escapeHtml(p.desc || "")}</p>
+        ${p.completion_criteria ? `<p class="muted"><b>Done when:</b> ${escapeHtml(p.completion_criteria)}</p>` : ""}
+        ${p.resource_url ? `<a class="resource-link" href="${escapeHtml(p.resource_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.resource_title || "Open learning resource")} ↗</a>` : ""}
       </div>
     </div>
   `).join("");
 }
 
-function updatePlanProgress() {
+function updatePlanProgress(changedIndex) {
+  if (Number.isInteger(changedIndex)) { const box = document.getElementById(`task-${changedIndex}`); const set = new Set(appState.completedPlan || []); box?.checked ? set.add(changedIndex) : set.delete(changedIndex); appState.completedPlan = [...set]; saveState(); if(appState.planId) fetch(`${API_BASE}/api/learning-plan/${appState.planId}/progress`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(appState.completedPlan)}).catch(()=>{}); }
   const total = appState.learningPlan?.length || 0;
-  const done = document.querySelectorAll(".plan-item input:checked").length;
+  const done = appState.completedPlan.length;
   if (total) {
     document.getElementById("stat-plan").textContent = `${done}/${total}`;
   }
@@ -543,13 +561,16 @@ async function startInterview() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         profile: appState.profile,
-        job_title: appState.targetJob.title
+        job_title: appState.targetJob.title,
+        job_id: appState.targetJob.id,
+        previous: appState.interviewSession.questions
       })
     });
 
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
 
+    appState.interviewSession.sessionId = data.session_id;
     appState.interviewSession.questions.push(data.question);
     appState.interviewSession.current = appState.interviewSession.questions.length - 1;
     saveState();
@@ -585,14 +606,17 @@ async function submitAnswer() {
       body: JSON.stringify({
         question: question,
         answer: answer,
-        job_title: appState.targetJob.title
+        job_title: appState.targetJob.title,
+        session_id: appState.interviewSession.sessionId
       })
     });
 
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
 
+    session.sessionId = data.session_id || session.sessionId;
     session.evaluations.push(data);
+    loadInterviewHistory();
     saveState();
 
     const avg = Math.round(
@@ -607,12 +631,13 @@ async function submitAnswer() {
         <b>Clarity:</b> ${data.clarity}/10
       </p>
       <p style="margin-top:12px;">${escapeHtml(data.feedback || "")}</p>
+      ${data.improved_answer ? `<p><b>Try structuring it this way:</b> ${escapeHtml(data.improved_answer)}</p>` : ""}
       <button class="btn-primary" style="margin-top:16px;" onclick="startInterview()">
         Next Question →
       </button>
     `;
   } catch (err) {
-    fb.innerHTML = `<p>❌ ${err.message}</p>`;
+    fb.innerHTML = `<p>❌ ${escapeHtml(err.message)}</p>`;
   }
 }
 
@@ -635,7 +660,12 @@ function escapeHtml(str) {
    INIT
    ============================================================ */
 window.addEventListener("DOMContentLoaded", () => {
+  const jobSearch = document.getElementById("jobSearch"); if (jobSearch) jobSearch.addEventListener("input", filterJobs);
   loadState();
+  restoreServerProfile();
+  appState.completedPlan = appState.completedPlan || [];
+  appState.completedPlan = appState.completedPlan || [];
+  appState.interviewSession = Object.assign({questions:[],current:-1,evaluations:[],sessionId:null},appState.interviewSession||{});
 
   // Restore UI if state exists
   if (appState.profile) {
@@ -664,3 +694,32 @@ window.addEventListener("DOMContentLoaded", () => {
     renderInterviewState();
   }
 });
+function populateProfileEditor(p) {
+  const values = {"edit-name":p.name||"","edit-skills":(p.skills||[]).join(", "),"edit-experience":(p.experience||[]).join(String.fromCharCode(10)),"edit-education":(p.education||[]).join(String.fromCharCode(10)),"edit-projects":(p.projects||[]).join(String.fromCharCode(10)),"edit-certifications":(p.certifications||[]).join(String.fromCharCode(10)),"edit-location":p.location||"","edit-level":p.career_level||"Entry"};
+  Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=value;});
+}
+async function saveEditedProfile() {
+  const lines=id=>document.getElementById(id).value.split(String.fromCharCode(10)).map(v=>v.trim()).filter(Boolean);
+  const profile={name:document.getElementById("edit-name").value.trim(),skills:document.getElementById("edit-skills").value.split(",").map(v=>v.trim()).filter(Boolean),experience:lines("edit-experience"),education:lines("edit-education"),projects:lines("edit-projects"),certifications:lines("edit-certifications"),location:document.getElementById("edit-location").value.trim(),career_level:document.getElementById("edit-level").value};
+  const status=document.getElementById("profileSaveStatus");status.textContent="Saving…";
+  try{const r=await fetch(API_BASE+"/api/profile",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile})});if(!r.ok)throw new Error();appState.profile=(await r.json()).profile;status.textContent="Saved to your local profile.";}catch(e){appState.profile=profile;status.textContent="Saved in this browser; API not reachable.";}
+  saveState();renderProfile(appState.profile);loadDashboard();
+}
+function filterJobs() {
+  const q=(document.getElementById("jobSearch")?.value||"").trim().toLowerCase();
+  const rows=appState.matchedJobs.filter(j=>!q||[j.title,j.company,j.location,...(j.required_skills||[]),...(j.matched||[]),...(j.missing||[])].join(" ").toLowerCase().includes(q));
+  renderJobs(rows);
+}
+async function loadInterviewHistory() {
+  const el=document.getElementById("interview-history-list"); if(!el)return;
+  try {
+    const r=await fetch(API_BASE+"/api/interview/history"); if(!r.ok)throw new Error();
+    const rows=(await r.json()).sessions||[];
+    el.innerHTML=rows.length?rows.map(s=>'<div class="history-row"><b>'+escapeHtml(s.job_title)+'</b><span>'+escapeHtml((s.created_at||"").slice(0,10))+'</span>'+(s.evaluation?'<p>Scores: '+s.evaluation.correctness+' / '+s.evaluation.completeness+' / '+s.evaluation.clarity+'</p>':'<p>Question saved; answer not submitted yet.</p>')+'</div>').join(""):"No interview sessions yet.";
+  } catch(e) { el.textContent="Interview history appears after the API is connected."; }
+}
+
+async function restoreServerProfile() {
+  if (appState.profile) return;
+  try { const r=await fetch(API_BASE+"/api/profile"); if(!r.ok)return; const data=await r.json(); appState.profile=data.profile;saveState();renderProfile(appState.profile);updateReadinessBadge();loadDashboard(); } catch(e) { /* API may be offline while browsing the landing page. */ }
+}

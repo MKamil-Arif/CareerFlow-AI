@@ -7,5 +7,5 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemini-1.5-flash"
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.7-flash")

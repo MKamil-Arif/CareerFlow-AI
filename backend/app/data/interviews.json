@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "behavioral",
+    "title": "Behavioral interview guidance",
+    "guidance": "Use a concise situation, task, action, result structure. State your own contribution and avoid claiming results you cannot support."
+  },
+  {
+    "id": "technical",
+    "title": "Technical interview guidance",
+    "guidance": "Clarify requirements, describe a practical approach, discuss trade-offs, and explain how you would test the result."
+  }
+]
