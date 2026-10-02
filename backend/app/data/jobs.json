@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Junior Frontend Developer",
+    "company": "TechNova",
+    "location": "Lahore (Remote)",
+    "required_skills": ["JavaScript", "React", "HTML", "CSS", "Git"],
+    "preferred_skills": ["TypeScript", "Next.js"],
+    "description": "Build modern web interfaces using React and TypeScript."
+  },
+  {
+    "id": 2,
+    "title": "React Developer",
+    "company": "PixelWorks",
+    "location": "Karachi (Hybrid)",
+    "required_skills": ["JavaScript", "React", "Git", "REST APIs"],
+    "preferred_skills": ["Redux", "Jest"],
+    "description": "Develop and maintain React applications in a fast-paced team."
+  },
+  {
+    "id": 3,
+    "title": "Data Analyst (Entry)",
+    "company": "InsightHub",
+    "location": "Islamabad",
+    "required_skills": ["Python", "SQL", "Excel"],
+    "preferred_skills": ["Pandas", "Power BI"],
+    "description": "Analyze business data and produce actionable insights."
+  },
+  {
+    "id": 4,
+    "title": "Backend Developer (Python)",
+    "company": "CloudMint",
+    "location": "Remote",
+    "required_skills": ["Python", "FastAPI", "SQL", "Git"],
+    "preferred_skills": ["Docker", "PostgreSQL"],
+    "description": "Build scalable backend services with Python and FastAPI."
+  },
+  {
+    "id": 5,
+    "title": "Full Stack Developer",
+    "company": "StackFlow",
+    "location": "Lahore",
+    "required_skills": ["JavaScript", "React", "Node.js", "SQL"],
+    "preferred_skills": ["TypeScript", "Docker"],
+    "description": "Work across frontend and backend to ship features end-to-end."
+  }
+]
