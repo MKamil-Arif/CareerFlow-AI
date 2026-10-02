@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerFlow AI — From Profile to Job Readiness</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ============ LANDING PAGE ============ -->
+  <section id="landing" class="landing">
+    <nav class="landing-nav">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 40 40" width="32" height="32">
+            <path d="M20 2 A18 18 0 1 0 20 38 A18 18 0 0 1 20 2" fill="#3a2b7a"/>
+            <path d="M14 22 C 18 26, 22 24, 26 18 L 32 12 L 28 14 L 22 20 C 18 22, 16 20, 14 22 Z" fill="#6a4cff"/>
+          </svg>
+        </div>
+        <span>CareerFlow <b>AI</b></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it Works</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+      <button class="btn-primary" onclick="showApp()">Get Started</button>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-badge">AI Career &amp; Employment Navigator</div>
+      <h1>Turn your resume into a<br /><span class="grad">personalized career path.</span></h1>
+      <p class="hero-sub">
+        CareerFlow AI analyzes your profile, matches you with real jobs, identifies
+        skill gaps, and builds a step-by-step plan from skills to job readiness.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-primary lg" onclick="showApp()">Upload Your Resume</button>
+        <button class="btn-ghost lg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See How It Works</button>
+      </div>
+
+      <div class="pipeline">
+        <span>Upload</span><i>→</i>
+        <span>Analyze</span><i>→</i>
+        <span>Match</span><i>→</i>
+        <span>Identify Gaps</span><i>→</i>
+        <span>Learn</span><i>→</i>
+        <span>Practice</span><i>→</i>
+        <span class="hl">Job-Ready</span>
+      </div>
+    </div>
+
+    <div id="features" class="features">
+      <h2>Everything you need to become job-ready</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">📄</div>
+          <h3>AI Resume Analyzer</h3>
+          <p>Extracts skills, education, experience, and projects into structured data automatically.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎯</div>
+          <h3>Explainable Job Matching</h3>
+          <p>Hybrid matching shows matched skills, missing skills, and why each role fits you.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h3>Skill Gap Engine</h3>
+          <p>See exactly what's missing for your target role, prioritized by importance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🗺️</div>
+          <h3>Personalized Learning Plan</h3>
+          <p>Get an actionable 7-day plan tied to real target-role requirements.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">✍️</div>
+          <h3>Resume Improvement</h3>
+          <p>Role-specific suggestions to align your resume with the jobs you want.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎤</div>
+          <h3>Interview Simulator</h3>
+          <p>Practice role-specific questions and get scored feedback instantly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="how" class="how">
+      <h2>One complete journey</h2>
+      <div class="steps">
+        <div class="step"><span>01</span><h4>Upload Resume</h4><p>PDF validated and parsed.</p></div>
+        <div class="step"><span>02</span><h4>Analyze Profile</h4><p>Skills &amp; experience extracted.</p></div>
+        <div class="step"><span>03</span><h4>Explore Jobs</h4><p>Roles ranked against you.</p></div>
+        <div class="step"><span>04</span><h4>Skill Gap</h4><p>Matched vs missing skills.</p></div>
+        <div class="step"><span>05</span><h4>Build Plan</h4><p>Personalized learning path.</p></div>
+        <div class="step"><span>06</span><h4>Practice</h4><p>Interview simulation &amp; feedback.</p></div>
+      </div>
+    </div>
+
+    <footer id="about" class="landing-footer">
+      <p><b>CareerFlow AI</b> — From Profile to Job Readiness</p>
+      <p class="muted">Hackathon MVP · FastAPI · ChromaDB · RAG · Groq · Gemini</p>
+    </footer>
+  </section>
+
+
+  <!-- ============ APP DASHBOARD ============ -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="logo small">
+        <div class="logo-mark">
+          <svg viewBox="0 0 40 40" width="26" height="26">
+            <path d="M20 2 A18 18 0 1 0 20 38 A18 18 0 0 1 20 2" fill="#3a2b7a"/>
+            <path d="M14 22 C 18 26, 22 24, 26 18 L 32 12 L 28 14 L 22 20 C 18 22, 16 20, 14 22 Z" fill="#6a4cff"/>
+          </svg>
+        </div>
+        <span>CareerFlow <b>AI</b></span>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item active" data-page="dashboard">📊 Dashboard</a>
+        <a class="nav-item" data-page="resume">📄 Resume</a>
+        <a class="nav-item" data-page="jobs">💼 Jobs</a>
+        <a class="nav-item" data-page="skills">🎯 Skill Gap</a>
+        <a class="nav-item" data-page="learning">🗺️ Learning</a>
+        <a class="nav-item" data-page="interview">🎤 Interview</a>
+      </nav>
+
+      <div class="side-footer">
+        <button class="btn-ghost sm" onclick="showLanding()">← Back to Home</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h2 id="page-title">Dashboard</h2>
+        <div class="topbar-right">
+          <div class="readiness-badge">
+            <span>Readiness</span>
+            <b id="readiness-score">0%</b>
+          </div>
+          <div class="avatar">U</div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- -------- DASHBOARD -------- -->
+        <section id="page-dashboard" class="page active">
+          <div class="cards-4">
+            <div class="stat-card"><span class="stat-label">Profile Strength</span><b id="stat-profile">—</b></div>
+            <div class="stat-card"><span class="stat-label">Matched Jobs</span><b id="stat-jobs">—</b></div>
+            <div class="stat-card"><span class="stat-label">Skill Gaps</span><b id="stat-gaps">—</b></div>
+            <div class="stat-card"><span class="stat-label">Plan Progress</span><b id="stat-plan">—</b></div>
+          </div>
+
+          <div class="panel">
+            <h3>Career Readiness Breakdown</h3>
+            <div class="progress-row"><span>Skill Relevance</span><div class="bar"><div class="fill" style="width:0%" id="bar-skills"></div></div><b id="val-skills">—</b></div>
+            <div class="progress-row"><span>Project Strength</span><div class="bar"><div class="fill" style="width:0%" id="bar-projects"></div></div><b id="val-projects">—</b></div>
+            <div class="progress-row"><span>Clarity</span><div class="bar"><div class="fill" style="width:0%" id="bar-clarity"></div></div><b id="val-clarity">—</b></div>
+            <div class="progress-row"><span>Role Alignment</span><div class="bar"><div class="fill" style="width:0%" id="bar-role"></div></div><b id="val-role">—</b></div>
+          </div>
+
+          <div class="panel">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+              <button class="qa" onclick="navigate('resume')">📄 Upload Resume</button>
+              <button class="qa" onclick="navigate('jobs')">💼 Explore Jobs</button>
+              <button class="qa" onclick="navigate('learning')">🗺️ Generate Plan</button>
+              <button class="qa" onclick="navigate('interview')">🎤 Practice Interview</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- -------- RESUME -------- -->
+        <section id="page-resume" class="page">
+          <div class="panel">
+            <h3>Upload Resume</h3>
+            <p class="muted">PDF only · Max 5MB · Your data stays private.</p>
+            <div id="dropzone" class="dropzone">
+              <input type="file" id="fileInput" accept="application/pdf" hidden />
+              <div class="dz-icon">⬆️</div>
+              <p><b>Drag &amp; drop</b> your PDF here or <span class="link">browse</span></p>
+            </div>
+            <div id="uploadStatus" class="upload-status hidden"></div>
+          </div>
+
+          <div id="profileResult" class="panel hidden">
+            <h3>Extracted Profile</h3>
+            <div class="profile-block">
+              <h4>Skills</h4>
+              <div id="p-skills" class="chips"></div>
+            </div>
+            <div class="profile-block">
+              <h4>Experience</h4>
+              <ul id="p-exp" class="clean-list"></ul>
+            </div>
+            <div class="profile-block">
+              <h4>Education</h4>
+              <ul id="p-edu" class="clean-list"></ul>
+            </div>
+            <div class="profile-block">
+              <h4>Projects</h4>
+              <ul id="p-proj" class="clean-list"></ul>
+            </div>
+            <button class="btn-primary" onclick="navigate('jobs')">Continue → Explore Jobs</button>
+          </div>
+        </section>
+
+        <!-- -------- JOBS -------- -->
+        <section id="page-jobs" class="page">
+          <div class="panel">
+            <h3>Recommended Jobs</h3>
+            <p class="muted">Ranked by hybrid matching (skills + semantic + eligibility).</p>
+            <div id="jobList" class="job-list"></div>
+          </div>
+        </section>
+
+        <!-- -------- SKILL GAP -------- -->
+        <section id="page-skills" class="page">
+          <div class="panel">
+            <h3>Skill Gap Analysis</h3>
+            <p class="muted">Target role: <b id="target-role-label">—</b></p>
+            <div class="gap-grid">
+              <div class="gap-col">
+                <h4 class="ok">✓ Already Have</h4>
+                <div id="gap-have" class="chips"></div>
+              </div>
+              <div class="gap-col">
+                <h4 class="warn">◐ Improve</h4>
+                <div id="gap-improve" class="chips"></div>
+              </div>
+              <div class="gap-col">
+                <h4 class="bad">✗ Priority Missing</h4>
+                <div id="gap-missing" class="chips"></div>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="navigate('learning')">Generate Learning Plan →</button>
+          </div>
+        </section>
+
+        <!-- -------- LEARNING -------- -->
+        <section id="page-learning" class="page">
+          <div class="panel">
+            <h3>Your 7-Day Learning Plan</h3>
+            <p class="muted">Tasks tied directly to your skill gaps.</p>
+            <div id="planList" class="plan-list"></div>
+          </div>
+        </section>
+
+        <!-- -------- INTERVIEW -------- -->
+        <section id="page-interview" class="page">
+          <div class="panel">
+            <h3>Interview Simulator</h3>
+            <p class="muted">Role-specific questions generated from the job context.</p>
+            <div class="interview-box">
+              <div class="q-block">
+                <span class="q-label">Question</span>
+                <p id="interview-q">Click "Start Interview" to begin.</p>
+              </div>
+              <textarea id="interview-answer" placeholder="Type your answer here..."></textarea>
+              <div class="interview-actions">
+                <button class="btn-primary" onclick="startInterview()">Start Interview</button>
+                <button class="btn-ghost" onclick="submitAnswer()">Submit Answer</button>
+              </div>
+            </div>
+            <div id="interview-feedback" class="feedback hidden"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
