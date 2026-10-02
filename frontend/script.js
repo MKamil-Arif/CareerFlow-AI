@@ -7,6 +7,26 @@
 // ---------- CONFIG ----------
 const API_BASE = window.CAREERFLOW_API_BASE || (window.location.port === "5500" || window.location.protocol === "file:" ? "http://127.0.0.1:8000" : window.location.origin);
 
+function applyTheme(theme) {
+  const dark = theme === "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  document.querySelectorAll("[data-theme-label]").forEach(label => { label.textContent = dark ? "Light mode" : "Dark mode"; });
+  document.querySelectorAll(".theme-toggle").forEach(button => {
+    button.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+    const icon = button.querySelector("[aria-hidden]");
+    if (icon) icon.textContent = dark ? "☀️" : "🌙";
+  });
+}
+
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(next);
+  try { localStorage.setItem("careerflow-theme", next); } catch (_) {}
+}
+
+try { applyTheme(localStorage.getItem("careerflow-theme") || "light"); }
+catch (_) { applyTheme("light"); }
+
 // ---------- GLOBAL STATE ----------
 const appState = {
   profile: null,

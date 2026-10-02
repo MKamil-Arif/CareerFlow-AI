@@ -23,7 +23,10 @@
         <li><a href="#how">How it Works</a></li>
         <li><a href="#about">About</a></li>
       </ul>
-      <button class="btn-primary" onclick="showApp()">Get Started</button>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
+        <button class="btn-primary" onclick="showApp()">Get Started</button>
+      </div>
     </nav>
 
     <div class="hero">
@@ -98,8 +101,9 @@
     </div>
 
     <footer id="about" class="landing-footer">
-      <p><b>CareerFlow AI</b> — From Profile to Job Readiness</p>
-      <p class="muted">Hackathon MVP · FastAPI · ChromaDB · RAG · Groq · Gemini</p>
+      <p><b>CareerFlow AI</b> — Your next career step starts here.</p>
+      <p class="muted">Build your profile, discover opportunities, grow your skills, and practice with confidence.</p>
+      <p class="footer-copy">© 2026 CareerFlow AI · Made to support your career journey.</p>
     </footer>
   </section>
 
@@ -130,6 +134,7 @@
       <header class="topbar">
         <h2 id="page-title">Dashboard</h2>
         <div class="topbar-right">
+          <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
           <div class="readiness-badge">
             <span>Readiness</span>
             <b id="readiness-score">0%</b>

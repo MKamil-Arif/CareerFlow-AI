@@ -297,3 +297,69 @@ b { font-weight: 700; }
 .score-details { margin-top: 14px; font-size: 13px; }
 .score-details summary { cursor: pointer; color: var(--purple); font-weight: 600; }
 .score-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; padding: 10px 0; text-transform: capitalize; }
+
+
+/* ============ JOURNEY, FOOTER & THEME ============ */
+.steps { gap: 22px; }
+.step { position: relative; box-shadow: 0 5px 18px rgba(31, 35, 70, .09), 0 1px 3px rgba(31, 35, 70, .05); transition: transform .2s ease, box-shadow .2s ease; }
+.step:hover { transform: translateY(-3px); box-shadow: 0 9px 24px rgba(31, 35, 70, .14), 0 2px 5px rgba(31, 35, 70, .07); }
+.step:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; top: 50%; right: -16px; transform: translateY(-50%); color: var(--purple); font-size: 19px; font-weight: 800; line-height: 1; }
+.landing-footer { padding: 38px 20px; }
+.footer-copy { color: var(--muted); font-size: 12px !important; margin-top: 16px !important; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; white-space: nowrap; }
+.theme-toggle:hover { border-color: var(--purple); transform: translateY(-1px); }
+.topbar-right .theme-toggle { margin-right: 2px; }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #11131d; --card: #1b1e2b; --text: #eef0fb; --muted: #a4abc0;
+  --purple: #9a85ff; --purple-dark: #6653bb; --border: #34384d;
+  --ok: #5cdb91; --warn: #f2bd5c; --bad: #ff7b83;
+  --shadow: 0 5px 20px rgba(0, 0, 0, .24);
+}
+:root[data-theme="dark"] body { color-scheme: dark; }
+:root[data-theme="dark"] .hero-badge,
+:root[data-theme="dark"] .readiness-badge { background: #30294b; color: #c2b4ff; }
+:root[data-theme="dark"] .pipeline span:not(.hl) { background: var(--card); }
+:root[data-theme="dark"] .nav-item:hover { background: #29263c; }
+:root[data-theme="dark"] .qa,
+:root[data-theme="dark"] .q-block { background: #27243b; border-color: #454064; color: var(--text); }
+:root[data-theme="dark"] .dropzone { border-color: #50566d; }
+:root[data-theme="dark"] .dropzone:hover,
+:root[data-theme="dark"] .dropzone.dragover { background: #211e32; }
+:root[data-theme="dark"] .chip { background: #2b3041; }
+:root[data-theme="dark"] .chip.ok,
+:root[data-theme="dark"] .match-pill { background: #1d3a30; color: #78e2a4; }
+:root[data-theme="dark"] .chip.warn { background: #40351f; color: #f2bd5c; }
+:root[data-theme="dark"] .chip.bad { background: #43272d; color: #ff9298; }
+:root[data-theme="dark"] .clean-list li,
+:root[data-theme="dark"] .plan-item,
+:root[data-theme="dark"] .feedback { background: #202331; }
+:root[data-theme="dark"] .bar,
+:root[data-theme="dark"] .match-bar { background: #34384b; }
+:root[data-theme="dark"] .profile-edit input,
+:root[data-theme="dark"] .profile-edit textarea,
+:root[data-theme="dark"] .profile-edit select,
+:root[data-theme="dark"] .job-search-label input,
+:root[data-theme="dark"] #interview-answer { background: #171a26; color: var(--text); border-color: var(--border); }
+:root[data-theme="dark"] .upload-status.loading { background: #30294b; color: #c2b4ff; }
+:root[data-theme="dark"] .upload-status.success { background: #1d3a30; color: #78e2a4; }
+:root[data-theme="dark"] .upload-status.error { background: #43272d; color: #ff9298; }
+:root[data-theme="dark"] .step { box-shadow: 0 5px 20px rgba(0, 0, 0, .28), 0 1px 3px rgba(0, 0, 0, .2); }
+:root[data-theme="dark"] .step:hover { box-shadow: 0 9px 25px rgba(0, 0, 0, .38); }
+
+@media (max-width: 900px) {
+  .steps { grid-template-columns: 1fr; gap: 18px; max-width: 520px; margin: 0 auto; }
+  .step:not(:last-child)::after { content: "↓"; top: auto; bottom: 0; right: 50%; transform: translate(50%, 50%); }
+}
+@media (max-width: 600px) {
+  .landing-nav { gap: 10px; }
+  .landing-nav > .logo { font-size: 16px; gap: 7px; }
+  .landing-nav .brand-logo-wrap { width: 36px; height: 36px; flex-basis: 36px; }
+  .landing-nav .brand-logo { width: 112px; left: -38px; top: -25px; }
+  .nav-actions { gap: 7px; }
+  .nav-actions .btn-primary { padding: 9px 11px; font-size: 12px; }
+  .theme-toggle { min-height: 38px; padding: 7px 9px; font-size: 12px; }
+  .steps { grid-template-columns: 1fr; gap: 18px; }
+}
