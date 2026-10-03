@@ -30,14 +30,6 @@ def skill_overlap(profile: dict[str, Any], job: dict[str, Any]) -> dict[str, lis
     }
 
 
-def compute_structured_score(profile: dict[str, Any], job: dict[str, Any]) -> tuple[int, list[str], list[str]]:
-    """Skills-only portion of the score (max 45) plus matched and missing skills."""
-    o = skill_overlap(profile, job)
-    score = len(o["matched_required"]) / max(len(job.get("required_skills", [])), 1) * WEIGHTS["required_skills"]
-    score += len(o["matched_preferred"]) / max(len(job.get("preferred_skills", [])), 1) * WEIGHTS["preferred_skills"]
-    return round(score), o["matched_required"] + o["matched_preferred"], o["missing_required"]
-
-
 def _cities(value: str) -> set[str]:
     words = re.findall(r"[a-z]+", value.lower())
     return {w for w in words if w not in {"remote", "hybrid", "onsite", "on", "site", "pakistan"} and len(w) > 2}

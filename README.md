@@ -1,9 +1,9 @@
 # CareerFlow AI
 
-**From profile to job readiness.** Upload a PDF resume and CareerFlow AI builds an editable profile, suggests roles that fit *your* CV in any field (regenerate them, steer them with a preference, or type your own target role) with a transparent score, shows your skill gaps, creates a 7-day learning plan with official documentation links, suggests resume improvements, and lets you practise interview questions with scored feedback.
+**From profile to job readiness.** Upload a PDF resume and CareerFlow AI builds an editable profile, suggests roles that fit *your* CV in any field (regenerate them, steer them with a preference, or type your own target role) with a transparent score, offers a **Career Coach chat** for short personalised advice, a **CV Builder** with 4 templates and PDF download, shows your skill gaps, creates a 7-day learning plan with official documentation links, suggests resume improvements, and lets you practise interview questions at **Easy, Medium or Hard** level with scored feedback.
 
 - **Frontend:** plain HTML, CSS and JavaScript (no build step)
-- **Backend:** FastAPI (Python 3.10+), stateless
+- **Backend:** FastAPI (Python 3.10+), stateless, with only 7 small runtime packages (AI providers are called over plain HTTPS — no SDKs)
 - **AI:** Groq first, Gemini as backup. Optional: with no keys every feature still works using offline rules.
 - **No database.** Curated data is read from JSON files. Your profile, plans, progress and interview history stay in **your browser** (localStorage). Uploaded resumes are processed in memory and never saved.
 
@@ -72,7 +72,7 @@ careerflow-ai/
 │   │   ├── api/routes.py        # REST endpoints (stateless)
 │   │   ├── core/security.py     # rate limiting + security headers
 │   │   ├── services/
-│   │   │   ├── ai_service.py        # Groq/Gemini calls + prompts (logged failures)
+│   │   │   ├── ai_service.py        # Groq/Gemini over plain HTTPS (no SDKs) + prompts
 │   │   │   ├── career_service.py    # offline parser, plans, questions, scoring
 │   │   │   ├── matching_service.py  # weighted 0–100 match + skill gaps
 │   │   │   ├── search_service.py    # in-memory TF-IDF search (replaces ChromaDB)
@@ -96,14 +96,14 @@ careerflow-ai/
 | GET | `/api/health` | Status, AI configuration, search index size |
 | POST | `/api/resume/analyze` | PDF upload → profile (`mode`: `ai` or `offline`) |
 | POST | `/api/resume/improve` | Resume suggestions for a target job |
-| GET | `/api/jobs`, `/api/jobs/{id}` | Curated roles (`?q=` and `?location=` filters) |
 | POST | `/api/jobs/recommend` | Roles suggested from the CV (any field). `exclude` = titles already shown (for regenerate), `preference` = e.g. "remote finance" |
 | POST | `/api/jobs/custom` | Build a target role from a typed title, scored against the profile |
-| POST | `/api/jobs/match` | Score the curated catalog against a profile |
 | POST | `/api/skills/gap` | `have` / `missing` (required) / `improve` (preferred) |
 | POST | `/api/learning-plan` | 7-day plan with official resources |
-| POST | `/api/interview/start` | Next question (technical → behavioral → scenario) |
-| POST | `/api/interview/evaluate` | Scores 0–10 for correctness, completeness, clarity |
+| POST | `/api/interview/start` | Next question (technical → behavioral → scenario); `difficulty`: `easy` \| `medium` \| `hard` |
+| POST | `/api/interview/evaluate` | Scores 0–10 for correctness, completeness, clarity (level-aware) |
+| POST | `/api/chat` | Career Coach: send the recent `messages` (+ optional `profile`, `job`); replies are kept under ~90 words |
+| POST | `/api/cv/summary` | Drafts a CV summary from the profile (the CV itself is rendered and printed in the browser) |
 
 Requests that need a profile send it in the body. Skill gap, learning plan, resume tips and interview requests take the target role as `"job": {...}` (the full role object the browser received), or `"job_id"` for a catalog role, so Skill Gap → Learning → Interview always follow the role the user selected — without the server storing anything.
 

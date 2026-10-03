@@ -43,3 +43,23 @@ def test_ai_scores_are_clamped(monkeypatch):
     monkeypatch.setattr(ai_service, "complete", lambda *a, **k: '{"correctness": 14, "completeness": -2, "clarity": "7", "feedback": "ok"}')
     result = ai_service.evaluate_answer("q", "a", "Dev")
     assert (result["correctness"], result["completeness"], result["clarity"]) == (10, 0, 7)
+
+
+def test_provider_responses_are_parsed(monkeypatch):
+    from app.config import settings
+    object.__setattr__(settings, "groq_model", "openai/gpt-oss-120b")
+    sent = []
+
+    def fake_post(url, headers, body):
+        sent.append((url, body))
+        if "groq" in url:
+            if "reasoning_effort" in body:
+                raise RuntimeError("HTTP 400: unsupported parameter reasoning_effort")
+            return {"choices": [{"message": {"content": " hello "}}]}
+        return {"candidates": [{"content": {"parts": [{"text": "thinking…", "thought": True}, {"text": "from gemini"}]}}]}
+
+    monkeypatch.setattr(ai_service, "_post", fake_post)
+    assert ai_service._call_groq("hi", 10, 0.1) == "hello"
+    assert "reasoning_effort" not in sent[-1][1]  # retried without the optional parameter
+    assert ai_service._call_gemini("hi", 10, 0.1) == "from gemini"
+    assert sent[-1][0].endswith(":generateContent")

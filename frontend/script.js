@@ -36,6 +36,11 @@ function freshState() {
     skillGap: { sig: null, jobId: null, gaps: null },
     plans: {},            // jobId -> { sig, plan, mode, notice }
     interview: { questions: [], current: -1, type: "" },
+    difficulty: "medium",
+    chat: [],             // [{role, content}] newest last
+    cv: null,             // CV builder details
+    cvTemplate: "modern",
+    cvAccent: "#6a4cff",
     history: []           // newest first
   };
 }
@@ -140,7 +145,7 @@ function toggleTheme() {
    ============================================================ */
 const PAGE_TITLES = {
   dashboard: "Dashboard", resume: "Resume Analyzer", jobs: "Recommended Roles",
-  skills: "Skill Gap Analysis", learning: "Learning Plan", interview: "Interview Simulator"
+  skills: "Skill Gap Analysis", learning: "Learning Plan", interview: "Interview Simulator", cv: "CV Builder"
 };
 
 function showApp(page) {
@@ -170,7 +175,8 @@ function navigate(page) {
   if (page === "jobs") loadJobs();
   if (page === "skills") loadSkillGap();
   if (page === "learning") loadPlan();
-  if (page === "interview") { renderInterviewState(); renderHistory(); }
+  if (page === "interview") { renderInterviewState(); renderHistory(); renderDifficulty(); }
+  if (page === "cv") initCvBuilder();
 }
 
 let serviceChecked = false;
@@ -652,7 +658,7 @@ function renderInterviewState() {
     $("q-label").textContent = "Question";
   } else {
     q.textContent = s.questions[s.current];
-    $("q-label").textContent = `Question ${s.current + 1}${s.type ? " · " + s.type : ""}`;
+    $("q-label").textContent = `Question ${s.current + 1}${s.type ? " · " + s.type : ""}${s.level ? " · " + s.level : ""}`;
   }
 }
 
@@ -665,8 +671,9 @@ async function startInterview(button) {
   try {
     const data = await api("/api/interview/start", {
       method: "POST",
-      json: { profile: state.profile, job_title: state.targetJob.title, job: roleForApi(), previous: state.interview.questions.slice(-30) }
+      json: { profile: state.profile, job_title: state.targetJob.title, job: roleForApi(), previous: state.interview.questions.slice(-30), difficulty: state.difficulty }
     });
+    state.interview.level = data.difficulty || state.difficulty;
     state.interview.questions.push(data.question);
     state.interview.questions = state.interview.questions.slice(-30);
     state.interview.current = state.interview.questions.length - 1;
@@ -693,13 +700,13 @@ async function submitAnswer() {
   try {
     const data = await api("/api/interview/evaluate", {
       method: "POST",
-      json: { question, answer, job_title: state.targetJob.title, job: roleForApi() }
+      json: { question, answer, job_title: state.targetJob.title, job: roleForApi(), difficulty: s.level || state.difficulty }
     });
     const avg = Math.round(((data.correctness || 0) + (data.completeness || 0) + (data.clarity || 0)) / 3);
     state.history.unshift({
       job_title: state.targetJob.title, question, answer: answer.slice(0, 2000),
       scores: { correctness: data.correctness, completeness: data.completeness, clarity: data.clarity },
-      mode: data.mode, created_at: new Date().toISOString()
+      mode: data.mode, level: s.level || state.difficulty, created_at: new Date().toISOString()
     });
     state.history = state.history.slice(0, HISTORY_LIMIT);
     saveState();
@@ -722,7 +729,7 @@ function renderHistory() {
     <div class="history-row">
       <b>${escapeHtml(h.job_title)}</b><span>${escapeHtml((h.created_at || "").slice(0, 10))}</span>
       <p>${escapeHtml((h.question || "").slice(0, 140))}${(h.question || "").length > 140 ? "…" : ""}</p>
-      <p>Scores: ${escapeHtml(h.scores.correctness)} / ${escapeHtml(h.scores.completeness)} / ${escapeHtml(h.scores.clarity)}${h.mode === "offline" ? " · offline rubric" : ""}</p>
+      <p>${h.level ? `<span class="level-tag ${escapeHtml(h.level)}">${escapeHtml(h.level)}</span> ` : ""}Scores: ${escapeHtml(h.scores.correctness)} / ${escapeHtml(h.scores.completeness)} / ${escapeHtml(h.scores.clarity)}${h.mode === "offline" ? " · offline rubric" : ""}</p>
     </div>`).join("");
 }
 
@@ -742,6 +749,11 @@ function resetData() {
   setNotice($("jobsNotice"), "");
   $("avatar").textContent = "U";
   renderHistory();
+  renderDifficulty();
+  renderChat();
+  cvInitialised = false;
+  $("cvResult").classList.add("hidden");
+  $("cvMissing").classList.add("hidden");
   navigate("dashboard");
 }
 
@@ -759,7 +771,6 @@ document.addEventListener("click", event => {
     case "scroll-to": { const t = $(el.dataset.target); if (t) t.scrollIntoView({ behavior: "smooth" }); return; }
     case "select-job": return selectJob(el.dataset.jobId);
     case "regenerate-jobs": return loadJobs("regenerate");
-    case "refresh-jobs": return loadJobs("refresh");
     case "improve-resume": return improveResume(el);
     case "regenerate-plan": return loadPlan(true);
     case "start-interview": return startInterview(el);
@@ -768,6 +779,22 @@ document.addEventListener("click", event => {
     case "reset-data": return resetData();
     case "clear-history": state.history = []; saveState(); return renderHistory();
     case "toggle-task": return; // handled by "change"
+    case "set-difficulty": return setDifficulty(el.dataset.level);
+    case "open-coach": return openCoach();
+    case "close-coach": return closeCoach();
+    case "new-chat": return newChat();
+    case "coach-suggest": return sendCoach(el.dataset.text);
+    case "cv-template": return setCvTemplate(el.dataset.template);
+    case "cv-accent": return setCvAccent(el.dataset.color);
+    case "cv-prefill": return prefillCv(true);
+    case "cv-add": return addCvEntry(el.dataset.list);
+    case "cv-remove": return removeCvEntry(el.dataset.list, Number(el.dataset.index));
+    case "cv-ai-summary": return aiSummary(el);
+    case "cv-generate": return generateCv(false);
+    case "cv-generate-anyway": return generateCv(true);
+    case "cv-fix": return focusCvField(el.dataset.target, el.dataset.list);
+    case "cv-download": return downloadCv();
+    case "cv-edit": { $("cvForm").scrollIntoView({ behavior: "smooth" }); return; }
     default:
       if (el.dataset.page) navigate(el.dataset.page);
   }
@@ -808,5 +835,406 @@ window.addEventListener("DOMContentLoaded", () => {
   renderProfile();
   renderDashboard();
   renderHistory();
+  renderDifficulty();
+  initCoach();
   if (state.matches.jobs.length) filterJobs();
 });
+
+/* ============================================================
+   INTERVIEW DIFFICULTY
+   ============================================================ */
+const DIFFICULTY_HINTS = {
+  easy: "Short, basic questions — good for freshers and warming up.",
+  medium: "Practical, real-work questions with one or two parts.",
+  hard: "In-depth questions on trade-offs and tricky situations."
+};
+
+function setDifficulty(level) {
+  if (!DIFFICULTY_HINTS[level]) return;
+  state.difficulty = level;
+  saveState();
+  renderDifficulty();
+}
+
+function renderDifficulty() {
+  const level = DIFFICULTY_HINTS[state.difficulty] ? state.difficulty : "medium";
+  document.querySelectorAll(".seg-btn[data-level]").forEach(b => {
+    const on = b.dataset.level === level;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-checked", on ? "true" : "false");
+  });
+  const hint = $("difficulty-hint");
+  if (hint) hint.textContent = DIFFICULTY_HINTS[level] + " Applies to your next question.";
+}
+
+/* ============================================================
+   CAREER COACH CHAT
+   ============================================================ */
+const CHAT_LIMIT = 30;
+const COACH_GREETING = "Hi! I'm your Career Coach 👋 Ask me anything about roles that fit you, skills to learn, your CV or interview prep. I'll keep it short.";
+let coachBusy = false;
+
+/** Tiny, safe formatter: escapes everything, then allows **bold** and "- " bullet lines. */
+function formatCoach(text) {
+  const lines = escapeHtml(text).split(/\n+/);
+  let html = "", inList = false;
+  lines.forEach(line => {
+    const bullet = line.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
+    const body = (bullet ? bullet[1] : line).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    if (bullet) { if (!inList) { html += "<ul>"; inList = true; } html += `<li>${body}</li>`; }
+    else { if (inList) { html += "</ul>"; inList = false; } if (body.trim()) html += `<p>${body}</p>`; }
+  });
+  return html + (inList ? "</ul>" : "");
+}
+
+function renderChat(pending) {
+  const box = $("coachMessages");
+  if (!box) return;
+  const msgs = [{ role: "assistant", content: COACH_GREETING }, ...state.chat];
+  box.innerHTML = msgs.map(m => `<div class="msg ${m.role === "user" ? "user" : "bot"}${m.error ? " error" : ""}">${m.role === "user" ? `<p>${escapeHtml(m.content)}</p>` : formatCoach(m.content)}</div>`).join("")
+    + (pending ? `<div class="msg bot typing" aria-label="Coach is typing"><span></span><span></span><span></span></div>` : "");
+  box.scrollTop = box.scrollHeight;
+}
+
+function renderSuggestions(list) {
+  const el = $("coachSuggestions");
+  const items = list || (state.profile
+    ? [state.targetJob ? `What should I learn first for ${state.targetJob.title}?` : "Which roles fit my profile?", "How can I improve my CV?", "How do I prepare for interviews?"]
+    : ["How do I start my career search?", "What makes a good CV?", "How do I prepare for interviews?"]);
+  el.innerHTML = items.slice(0, 3).map(t => `<button type="button" class="chip-btn" data-action="coach-suggest" data-text="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join("");
+}
+
+function openCoach() {
+  $("coach").classList.remove("hidden");
+  document.body.classList.add("coach-open");
+  renderChat();
+  renderSuggestions();
+  setTimeout(() => $("coachInput").focus(), 50);
+}
+function closeCoach() {
+  $("coach").classList.add("hidden");
+  document.body.classList.remove("coach-open");
+}
+function newChat() {
+  state.chat = [];
+  saveState();
+  renderChat();
+  renderSuggestions();
+  $("coachInput").focus();
+}
+
+async function sendCoach(text) {
+  const message = (text || "").trim().slice(0, 1500);
+  if (!message || coachBusy) return;
+  coachBusy = true;
+  $("coachSend").disabled = true;
+  state.chat.push({ role: "user", content: message });
+  state.chat = state.chat.slice(-CHAT_LIMIT);
+  saveState();
+  renderChat(true);
+  $("coachSuggestions").innerHTML = "";
+  try {
+    const payload = { messages: state.chat.filter(m => !m.error).slice(-10).map(m => ({ role: m.role, content: m.content })) };
+    if (state.profile) payload.profile = state.profile;
+    if (state.targetJob) payload.job = roleForApi();
+    const data = await api("/api/chat", { method: "POST", json: payload });
+    state.chat.push({ role: "assistant", content: data.reply });
+    state.chat = state.chat.slice(-CHAT_LIMIT);
+    saveState();
+    renderChat();
+    renderSuggestions(data.suggestions);
+  } catch (err) {
+    state.chat.push({ role: "assistant", content: "Sorry — " + err.message, error: true });
+    renderChat();
+    renderSuggestions();
+  } finally {
+    coachBusy = false;
+    $("coachSend").disabled = false;
+  }
+}
+
+function initCoach() {
+  const input = $("coachInput");
+  $("coachForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const text = input.value;
+    input.value = "";
+    input.style.height = "";
+    sendCoach(text);
+  });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("coachForm").requestSubmit(); }
+  });
+  input.addEventListener("input", () => { input.style.height = ""; input.style.height = Math.min(120, input.scrollHeight) + "px"; });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("coach").classList.contains("hidden")) closeCoach(); });
+}
+
+/* ============================================================
+   CV BUILDER
+   ============================================================ */
+const CV_TEMPLATES = [
+  { id: "modern", name: "Modern", note: "Colour sidebar, two columns" },
+  { id: "classic", name: "Classic", note: "Traditional, centred header" },
+  { id: "minimal", name: "Minimal", note: "Clean and airy" },
+  { id: "professional", name: "Professional", note: "Bold header band" }
+];
+const CV_ACCENTS = ["#6a4cff", "#1f6feb", "#0f766e", "#b45309", "#be123c", "#334155"];
+const CV_LISTS = {
+  experience: { fields: [["title", "Job title"], ["org", "Company / organisation"], ["dates", "Dates (e.g. Jan 2024 – Present)"], ["location", "Location"]], bullets: "What you did and achieved (one per line)" },
+  education: { fields: [["degree", "Degree / qualification"], ["school", "School / university"], ["dates", "Year(s)"], ["details", "Grade or details (optional)"]] },
+  projects: { fields: [["name", "Project name"], ["link", "Link (optional)"]], bullets: "Short description (one point per line)" }
+};
+const SAMPLE_CV = {
+  name: "Ayesha Khan", headline: "Marketing Executive", email: "ayesha@example.com", phone: "+92 300 0000000", location: "Lahore, Pakistan",
+  linkedin: "", website: "", summary: "Marketing graduate with hands-on experience running social campaigns and writing SEO content.",
+  skills: ["SEO", "Content Writing", "Canva", "Google Analytics", "Excel"],
+  experience: [{ title: "Marketing Intern", org: "Brandly", dates: "2025", location: "Lahore", bullets: ["Grew Instagram followers by 40%", "Wrote 12 blog posts"] }],
+  education: [{ degree: "BBA Marketing", school: "University of the Punjab", dates: "2021 – 2025", details: "" }],
+  projects: [{ name: "Bakery campaign", link: "", bullets: ["Planned a 4-week social campaign"] }],
+  certifications: ["Google Digital Garage"], languages: ["English", "Urdu"]
+};
+let cvInitialised = false;
+
+function emptyCv() {
+  return { name: "", headline: "", email: "", phone: "", location: "", linkedin: "", website: "", summary: "",
+    skills: [], experience: [], education: [], projects: [], certifications: [], languages: [] };
+}
+
+/** "Title — Company (dates)" → parts. Works for experience, education and project lines. */
+function splitLine(line) {
+  const m = String(line).match(/^(.*?)\s+[—–-]\s+(.*?)(?:\s*\(([^)]*)\))?\s*$/);
+  if (m) return [m[1].trim(), m[2].trim(), (m[3] || "").trim()];
+  const p = String(line).match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  return p ? [p[1].trim(), "", p[2].trim()] : [String(line).trim(), "", ""];
+}
+
+function cvFromProfile(p) {
+  const cv = emptyCv();
+  if (!p) return cv;
+  cv.name = p.name || "";
+  cv.location = p.location || "";
+  cv.headline = state.targetJob ? state.targetJob.title : "";
+  cv.skills = (p.skills || []).slice();
+  cv.experience = (p.experience || []).map(l => { const [title, org, dates] = splitLine(l); return { title, org, dates, location: "", bullets: [] }; });
+  cv.education = (p.education || []).map(l => { const [degree, school, dates] = splitLine(l); return { degree, school, dates, details: "" }; });
+  cv.projects = (p.projects || []).map(l => { const [name, desc] = splitLine(l); return { name, link: "", bullets: desc ? [desc] : [] }; });
+  cv.certifications = (p.certifications || []).slice();
+  return cv;
+}
+
+function prefillCv(force) {
+  const fresh = cvFromProfile(state.profile);
+  if (force && state.cv) {
+    if (!window.confirm("Replace the details below with the ones from your profile? Contact details you typed are kept.")) return;
+    ["email", "phone", "linkedin", "website", "summary", "languages"].forEach(k => { if (state.cv[k] && (Array.isArray(state.cv[k]) ? state.cv[k].length : true)) fresh[k] = state.cv[k]; });
+  }
+  state.cv = fresh;
+  saveState();
+  renderCvForm();
+}
+
+function initCvBuilder() {
+  if (!state.cv) state.cv = cvFromProfile(state.profile);
+  renderTemplatePicker();
+  if (!cvInitialised) {
+    renderCvForm();
+    $("cvForm").addEventListener("input", onCvInput);
+    $("cvForm").addEventListener("submit", e => e.preventDefault());
+    cvInitialised = true;
+  }
+}
+
+function renderTemplatePicker() {
+  $("templateGrid").innerHTML = CV_TEMPLATES.map(t => `
+    <button type="button" class="template-card${state.cvTemplate === t.id ? " active" : ""}" data-action="cv-template" data-template="${t.id}" role="radio" aria-checked="${state.cvTemplate === t.id}">
+      <div class="template-thumb" aria-hidden="true"><div class="thumb-scale">${renderCv(SAMPLE_CV, t.id, state.cvAccent)}</div></div>
+      <b>${t.name}</b><span class="muted">${t.note}</span>
+    </button>`).join("");
+  $("accentPicker").innerHTML = CV_ACCENTS.map(c => `<button type="button" class="accent-dot${state.cvAccent === c ? " active" : ""}" data-action="cv-accent" data-color="${c}" aria-label="Accent ${c}" role="radio" aria-checked="${state.cvAccent === c}"></button>`).join("");
+  $("accentPicker").querySelectorAll(".accent-dot").forEach(d => { d.style.background = d.dataset.color; });
+  applyAccent($("templateGrid"));
+  requestAnimationFrame(() => document.querySelectorAll(".template-thumb").forEach(t => t.style.setProperty("--thumb-scale", (t.clientWidth / 794).toFixed(4))));
+}
+
+function setCvTemplate(id) {
+  state.cvTemplate = id; saveState(); renderTemplatePicker();
+  if (!$("cvResult").classList.contains("hidden")) showCvPreview();
+}
+function setCvAccent(color) {
+  if (!CV_ACCENTS.includes(color)) return;
+  state.cvAccent = color; saveState(); renderTemplatePicker();
+  if (!$("cvResult").classList.contains("hidden")) showCvPreview();
+}
+function applyAccent(root) {
+  root.querySelectorAll(".cv").forEach(el => el.style.setProperty("--cv-accent", el.dataset.accent || state.cvAccent));
+}
+
+function renderCvForm() {
+  const cv = state.cv || emptyCv();
+  document.querySelectorAll("#cvForm [data-cv]").forEach(el => {
+    const v = cv[el.dataset.cv];
+    el.value = Array.isArray(v) ? v.join(el.dataset.cv === "certifications" ? "\n" : ", ") : (v || "");
+  });
+  Object.keys(CV_LISTS).forEach(renderCvList);
+}
+
+function renderCvList(list) {
+  const spec = CV_LISTS[list];
+  const items = state.cv[list] || [];
+  const box = $("cv-" + list);
+  box.innerHTML = items.length ? items.map((item, i) => `
+    <div class="cv-entry">
+      <div class="cv-entry-grid">
+        ${spec.fields.map(([key, label]) => `<label>${escapeHtml(label)}<input type="text" maxlength="160" data-list="${list}" data-index="${i}" data-field="${key}" id="cv-${list}-${i}-${key}" value="${escapeHtml(item[key] || "")}" /></label>`).join("")}
+      </div>
+      ${spec.bullets ? `<label class="full">${escapeHtml(spec.bullets)}<textarea rows="2" maxlength="1500" data-list="${list}" data-index="${i}" data-field="bullets">${escapeHtml((item.bullets || []).join("\n"))}</textarea></label>` : ""}
+      <button type="button" class="link-btn danger-link" data-action="cv-remove" data-list="${list}" data-index="${i}">Remove</button>
+    </div>`).join("") : `<p class="muted small-note">Nothing added yet.</p>`;
+}
+
+function addCvEntry(list) {
+  const blank = { experience: { title: "", org: "", dates: "", location: "", bullets: [] }, education: { degree: "", school: "", dates: "", details: "" }, projects: { name: "", link: "", bullets: [] } }[list];
+  if (!blank) return;
+  state.cv[list].push(blank);
+  saveState();
+  renderCvList(list);
+  const first = $(`cv-${list}-${state.cv[list].length - 1}-${CV_LISTS[list].fields[0][0]}`);
+  if (first) first.focus();
+}
+function removeCvEntry(list, index) {
+  state.cv[list].splice(index, 1);
+  saveState();
+  renderCvList(list);
+}
+
+let cvSaveTimer = null;
+function onCvInput(e) {
+  const el = e.target;
+  if (el.dataset.cv) {
+    const key = el.dataset.cv;
+    if (key === "skills" || key === "languages") state.cv[key] = el.value.split(/[,\n]/).map(v => v.trim()).filter(Boolean).slice(0, 40);
+    else if (key === "certifications") state.cv[key] = el.value.split("\n").map(v => v.trim()).filter(Boolean).slice(0, 20);
+    else state.cv[key] = el.value;
+  } else if (el.dataset.list) {
+    const item = state.cv[el.dataset.list][Number(el.dataset.index)];
+    if (!item) return;
+    item[el.dataset.field] = el.dataset.field === "bullets" ? el.value.split("\n").map(v => v.trim()).filter(Boolean).slice(0, 8) : el.value;
+  }
+  el.classList.remove("needs-input");
+  clearTimeout(cvSaveTimer);
+  cvSaveTimer = setTimeout(saveState, 300);
+}
+
+async function aiSummary(button) {
+  if (!state.profile) { $("cv-summary").focus(); return; }
+  setBusy(button, true, "✨ Writing…");
+  try {
+    const payload = { profile: state.profile, headline: state.cv.headline || "" };
+    if (state.targetJob) payload.job = roleForApi();
+    const data = await api("/api/cv/summary", { method: "POST", json: payload });
+    state.cv.summary = data.summary;
+    $("cv-summary").value = data.summary;
+    $("cv-summary").classList.remove("needs-input");
+    saveState();
+  } catch (err) {
+    button.insertAdjacentHTML("afterend", `<span class="cv-hint muted" role="status">Couldn't write a summary: ${escapeHtml(err.message)}</span>`);
+    setTimeout(() => document.querySelectorAll(".cv-hint").forEach(h => h.remove()), 6000);
+  } finally { setBusy(button, false); }
+}
+
+/** Everything a complete CV needs. Each item says which field to jump to. */
+function cvMissing(cv) {
+  const missing = [];
+  const need = (ok, label, target, list) => { if (!ok) missing.push({ label, target, list }); };
+  need(cv.name.trim().length >= 2, "Your full name", "cv-name");
+  need(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cv.email.trim()), cv.email.trim() ? "A valid email address" : "Your email address", "cv-email");
+  need(cv.phone.replace(/\D/g, "").length >= 7, "Your phone number", "cv-phone");
+  need(cv.location.trim().length >= 2, "Your location (city, country)", "cv-location");
+  need(cv.summary.trim().split(/\s+/).length >= 10, "A professional summary (at least 2 sentences)", "cv-summary");
+  need(cv.skills.length >= 3, "At least 3 skills", "cv-skills");
+  need(cv.education.some(e => e.degree.trim() && e.school.trim()), "Your education (degree and school)", "cv-education", "education");
+  need(cv.experience.some(e => e.title.trim()) || cv.projects.some(p => p.name.trim()), "At least one experience or project", "cv-experience", "experience");
+  cv.experience.forEach((e, i) => { if (e.title.trim() && !e.org.trim()) need(false, `Company for "${e.title}"`, `cv-experience-${i}-org`); });
+  return missing;
+}
+
+function focusCvField(target, list) {
+  let el = $(target);
+  if (list && (!state.cv[list].length || el === $("cv-" + list))) {
+    if (!state.cv[list].length) addCvEntry(list);
+    el = $(`cv-${list}-0-${CV_LISTS[list].fields[0][0]}`);
+  }
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("needs-input");
+  setTimeout(() => el.focus(), 300);
+}
+
+function generateCv(anyway) {
+  const box = $("cvMissing");
+  const missing = cvMissing(state.cv);
+  if (missing.length && !anyway) {
+    box.innerHTML = `<p><b>A few details are missing.</b> Add them for a complete CV:</p>
+      <ul>${missing.map(m => `<li><span>${escapeHtml(m.label)}</span> <button type="button" class="link-btn" data-action="cv-fix" data-target="${escapeHtml(m.target)}"${m.list ? ` data-list="${m.list}"` : ""}>Add now</button></li>`).join("")}</ul>
+      <button type="button" class="btn-ghost" data-action="cv-generate-anyway">Generate anyway</button>`;
+    box.classList.remove("hidden");
+    $("cvResult").classList.add("hidden");
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  box.classList.add("hidden");
+  showCvPreview();
+  $("cvResult").classList.remove("hidden");
+  $("cvResult").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function showCvPreview() {
+  $("cvPreview").innerHTML = renderCv(state.cv, state.cvTemplate, state.cvAccent);
+  applyAccent($("cvPreview"));
+}
+
+function downloadCv() {
+  const holder = $("cvPrint");
+  holder.innerHTML = renderCv(state.cv, state.cvTemplate, state.cvAccent);
+  applyAccent(holder);
+  const oldTitle = document.title;
+  document.title = ((state.cv.name || "My").trim() + " CV").replace(/[\\/:*?"<>|]/g, "");
+  document.body.classList.add("printing-cv");
+  const done = () => { document.body.classList.remove("printing-cv"); document.title = oldTitle; holder.innerHTML = ""; window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  window.print();
+  setTimeout(() => { if (document.body.classList.contains("printing-cv") && !window.matchMedia("print").matches) done(); }, 1500);
+}
+
+/** Render a CV as HTML for a template. All values are escaped. */
+function renderCv(cv, template, accent) {
+  const e = escapeHtml;
+  const link = u => { const s = safeUrl(u); return s ? `<a href="${e(s)}">${e(s.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</a>` : ""; };
+  const contact = [cv.email && `<span>✉ ${e(cv.email)}</span>`, cv.phone && `<span>☎ ${e(cv.phone)}</span>`, cv.location && `<span>⌂ ${e(cv.location)}</span>`,
+    cv.linkedin && `<span>in ${link(cv.linkedin)}</span>`, cv.website && `<span>🔗 ${link(cv.website)}</span>`].filter(Boolean);
+  const bullets = list => list && list.length ? `<ul>${list.map(b => `<li>${e(b)}</li>`).join("")}</ul>` : "";
+  const sec = (title, body) => body ? `<section class="cv-sec"><h3>${title}</h3>${body}</section>` : "";
+  const exp = (cv.experience || []).filter(x => x.title || x.org).map(x => `
+    <div class="cv-item"><div class="cv-item-head"><b>${e(x.title)}</b>${x.org ? `<span class="cv-org">${e(x.org)}${x.location ? ", " + e(x.location) : ""}</span>` : ""}<span class="cv-date">${e(x.dates)}</span></div>${bullets(x.bullets)}</div>`).join("");
+  const edu = (cv.education || []).filter(x => x.degree || x.school).map(x => `
+    <div class="cv-item"><div class="cv-item-head"><b>${e(x.degree)}</b><span class="cv-org">${e(x.school)}</span><span class="cv-date">${e(x.dates)}</span></div>${x.details ? `<p>${e(x.details)}</p>` : ""}</div>`).join("");
+  const proj = (cv.projects || []).filter(x => x.name).map(x => `
+    <div class="cv-item"><div class="cv-item-head"><b>${e(x.name)}</b>${x.link ? `<span class="cv-org">${link(x.link)}</span>` : ""}</div>${bullets(x.bullets)}</div>`).join("");
+  const skills = (cv.skills || []).length ? `<div class="cv-skills">${cv.skills.map(s => `<span>${e(s)}</span>`).join("")}</div>` : "";
+  const certs = (cv.certifications || []).length ? bullets(cv.certifications) : "";
+  const langs = (cv.languages || []).length ? `<p>${cv.languages.map(e).join(" · ")}</p>` : "";
+  const summary = cv.summary ? `<p>${e(cv.summary)}</p>` : "";
+  const head = `<h1>${e(cv.name || "Your Name")}</h1>${cv.headline ? `<p class="cv-headline">${e(cv.headline)}</p>` : ""}`;
+  const main = sec("Profile", summary) + sec("Experience", exp) + sec("Projects", proj) + sec("Education", edu);
+  const side = sec("Skills", skills) + sec("Certifications", certs) + sec("Languages", langs);
+  const t = ["modern", "classic", "minimal", "professional"].includes(template) ? template : "modern";
+  const accentAttr = `data-accent="${e(accent || "#6a4cff")}"`;
+  if (t === "modern") {
+    return `<article class="cv t-modern" ${accentAttr}><aside class="cv-side">${head}<div class="cv-contact">${contact.join("")}</div>${side}</aside><div class="cv-main">${main}</div></article>`;
+  }
+  if (t === "professional") {
+    return `<article class="cv t-professional" ${accentAttr}><header class="cv-band">${head}<div class="cv-contact">${contact.join("")}</div></header><div class="cv-cols"><div class="cv-main">${main}</div><aside class="cv-side">${side}</aside></div></article>`;
+  }
+  return `<article class="cv t-${t}" ${accentAttr}><header class="cv-header">${head}<div class="cv-contact">${contact.join("")}</div></header>${sec("Profile", summary)}${sec("Skills", skills)}${sec("Experience", exp)}${sec("Projects", proj)}${sec("Education", edu)}${sec("Certifications", certs)}${sec("Languages", langs)}</article>`;
+}
+window.addEventListener("resize", () => document.querySelectorAll(".template-thumb").forEach(t => t.style.setProperty("--thumb-scale", (t.clientWidth / 794).toFixed(4))));

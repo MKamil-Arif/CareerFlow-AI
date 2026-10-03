@@ -29,17 +29,10 @@ def test_frontend_is_served(client):
     assert "Content-Security-Policy" in r.headers
 
 
-def test_jobs_and_search(client):
-    from app.services import knowledge
-    assert len(client.get("/api/jobs").json()["jobs"]) == len(knowledge.jobs()) >= 30
-    rows = client.get("/api/jobs", params={"q": "python"}).json()["jobs"]
-    assert rows and all("python" in (j["title"] + " ".join(j["required_skills"] + j["preferred_skills"]) + j["description"]).lower() for j in rows)
-    assert client.get("/api/jobs/999").status_code == 404
-
-
 def test_match_gap_plan_flow_offline(client):
-    jobs = client.post("/api/jobs/match", json={"profile": PROFILE}).json()["jobs"]
-    target = jobs[0]["id"]
+    jobs = client.post("/api/jobs/recommend", json={"profile": PROFILE}).json()["jobs"]
+    assert jobs and all(0 <= j["match"] <= 100 for j in jobs)
+    target = next(j["id"] for j in jobs if isinstance(j["id"], int))
     gaps = client.post("/api/skills/gap", json={"profile": PROFILE, "job_id": target}).json()["gaps"]
     assert set(gaps) >= {"have", "missing", "improve"}
     plan = client.post("/api/learning-plan", json={"profile": PROFILE, "job_id": target}).json()
@@ -98,3 +91,18 @@ def test_ai_mode_is_used_when_provider_answers(client, monkeypatch):
     assert q["mode"] == "ai" and q["question"].startswith("How would")
     ev = client.post("/api/interview/evaluate", json={"question": "q", "answer": "a", "job_title": "x"}).json()
     assert ev["mode"] == "ai" and ev["clarity"] == 9
+
+
+def test_removed_endpoints_are_gone(client):
+    assert client.post("/api/jobs/match", json={"profile": PROFILE}).status_code in (404, 405)
+    assert client.post("/api/resume/upload").status_code in (404, 405)
+
+
+def test_real_pdf_is_parsed_end_to_end(client):
+    from pathlib import Path
+    pdf = (Path(__file__).parent / "fixtures" / "sample_resume.pdf").read_bytes()
+    body = client.post("/api/resume/analyze", files={"file": ("cv.pdf", pdf, "application/pdf")}).json()
+    p = body["profile"]
+    assert p["name"] == "Sara Ahmed" and p["location"].startswith("Lahore")
+    assert {"JavaScript", "React", "HTML", "CSS", "Git"} <= set(p["skills"])
+    assert p["education"] and p["experience"] and p["projects"]

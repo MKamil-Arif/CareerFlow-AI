@@ -46,7 +46,9 @@ def test_custom_role_drives_gap_plan_and_interview(client):
     plan = client.post("/api/learning-plan", json={"profile": MARKETER, "job": role}).json()
     assert plan["target_role"] == "Brand Manager" and all(d["resource_url"].startswith("https://") for d in plan["plan"])
     q = client.post("/api/interview/start", json={"profile": MARKETER, "job_title": role["title"], "job": role}).json()
-    assert "Brand Manager" in q["question"] or q["type"] == "behavioral"
+    assert q["question"] and q["difficulty"] == "medium"
+    skills = role["required_skills"]
+    assert any(sk in q["question"] for sk in skills) or "Brand Manager" in q["question"]
 
 
 def test_ai_recommendations_are_validated_scored_and_deduplicated(client, monkeypatch):

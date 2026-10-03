@@ -7,13 +7,13 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app import __version__
 from app.config import settings
 from app.core.security import limit_ai, limit_default
-from app.schemas import (CustomRolePayload, InterviewEvalPayload, InterviewStartPayload, JobTargetPayload, Profile,
-                         ProfilePayload, RecommendPayload)
+from app.schemas import (ChatPayload, CustomRolePayload, InterviewEvalPayload, InterviewStartPayload, JobTargetPayload,
+                         Profile, RecommendPayload, SummaryPayload)
 from app.services import ai_service, career_service, knowledge, matching_service, pdf_service, search_service
 from app.services.skills import dedupe, find_in_text
 
@@ -63,7 +63,6 @@ def health():
 
 # ---------------------------------------------------------------- resume
 @router.post("/resume/analyze", dependencies=[Depends(limit_ai)])
-@router.post("/resume/upload", dependencies=[Depends(limit_ai)], include_in_schema=False)
 async def analyze_resume(file: UploadFile = File(...)):
     filename = (file.filename or "").lower()
     if file.content_type not in {"application/pdf", "application/x-pdf", "application/octet-stream", None} and not filename.endswith(".pdf"):
@@ -116,34 +115,6 @@ def improve_resume(payload: JobTargetPayload):
 
 
 # ---------------------------------------------------------------- jobs
-@router.get("/jobs", dependencies=[Depends(limit_default)])
-def jobs_list(q: str = Query(default="", max_length=120), location: str = Query(default="", max_length=120)):
-    rows = knowledge.jobs()
-    if q:
-        terms = q.casefold().split()
-        rows = [j for j in rows if all(t in " ".join([j.get("title", ""), j.get("company", ""), j.get("description", ""),
-                                                        *j.get("required_skills", []), *j.get("preferred_skills", [])]).casefold() for t in terms)]
-    if location:
-        loc = location.casefold()
-        rows = [j for j in rows if loc in j.get("location", "").casefold() or "remote" in j.get("location", "").casefold()]
-    return {"jobs": rows, "notice": "Curated sample roles; vacancy status has not been verified."}
-
-
-@router.get("/jobs/{job_id}", dependencies=[Depends(limit_default)])
-def job_get(job_id: int):
-    return {"job": _job_or_404(job_id)}
-
-
-@router.post("/jobs/match", dependencies=[Depends(limit_default)])
-def match_jobs(payload: ProfilePayload):
-    results = matching_service.match_jobs(_profile_dict(payload.profile), knowledge.jobs(), top_n=100)
-    return {
-        "jobs": results,
-        "weights": matching_service.WEIGHTS,
-        "notice": "Scores are weighted guidance, not hiring probabilities. Roles are curated examples, not verified openings.",
-    }
-
-
 @router.post("/jobs/recommend", dependencies=[Depends(limit_ai)])
 def recommend_jobs(payload: RecommendPayload):
     """Roles chosen for this CV (any field). Send already-shown titles in `exclude` to get different ones."""
@@ -223,14 +194,15 @@ def start_interview(payload: InterviewStartPayload):
     qtype = career_service.question_type(payload.previous)
     try:
         context = career_service.interview_context(title, requirements)
-        question = ai_service.interview_question(profile, title, payload.previous, requirements, qtype, context)
+        question = ai_service.interview_question(profile, title, payload.previous, requirements, qtype, context, payload.difficulty)
         mode = "ai"
     except Exception as exc:
         log.info("Interview question from offline bank (%s)", type(exc).__name__)
-        question, mode = career_service.offline_question(job, title, payload.previous), "offline"
+        question, mode = career_service.offline_question(job, title, payload.previous, payload.difficulty), "offline"
     return {
         "question": question,
         "type": qtype,
+        "difficulty": payload.difficulty,
         "mode": mode,
         "notice": "Practice coaching only; not an official hiring assessment.",
     }
@@ -240,10 +212,10 @@ def start_interview(payload: InterviewStartPayload):
 def evaluate(payload: InterviewEvalPayload):
     job = payload.job.model_dump() if payload.job is not None else (knowledge.job_by_id(payload.job_id) if payload.job_id else None)
     try:
-        result, mode = ai_service.evaluate_answer(payload.question, payload.answer, payload.job_title), "ai"
+        result, mode = ai_service.evaluate_answer(payload.question, payload.answer, payload.job_title, payload.difficulty), "ai"
     except Exception as exc:
         log.info("Interview evaluation using offline rubric (%s)", type(exc).__name__)
-        result, mode = career_service.offline_evaluate(payload.question, payload.answer, job), "offline"
+        result, mode = career_service.offline_evaluate(payload.question, payload.answer, job, payload.difficulty), "offline"
     return {
         **result,
         "rubric": {
@@ -254,3 +226,33 @@ def evaluate(payload: InterviewEvalPayload):
         "mode": mode,
         "notice": "Practice guidance only; scores are not an official hiring assessment.",
     }
+
+
+# ---------------------------------------------------------------- career coach
+@router.post("/chat", dependencies=[Depends(limit_ai)])
+def chat(payload: ChatPayload):
+    """Short, personalised career-growth answers. The browser sends the recent conversation each time."""
+    profile = _profile_dict(payload.profile) if payload.profile else None
+    job = payload.job.model_dump() if payload.job else None
+    gaps = matching_service.skill_gaps(profile, job) if profile and job else None
+    messages = [m.model_dump() for m in payload.messages]
+    try:
+        reply, mode = ai_service.chat_reply(messages, profile, job, gaps), "ai"
+    except Exception as exc:
+        log.info("Coach using offline answers (%s)", type(exc).__name__)
+        reply, mode = career_service.offline_coach(messages[-1]["content"], profile, job, gaps), "offline"
+    return {"reply": reply, "mode": mode, "suggestions": career_service.coach_suggestions(job, profile is not None)}
+
+
+# ---------------------------------------------------------------- CV builder helper
+@router.post("/cv/summary", dependencies=[Depends(limit_ai)])
+def cv_summary(payload: SummaryPayload):
+    """Draft a short CV summary from the profile (the CV itself is built in the browser)."""
+    profile = _profile_dict(payload.profile)
+    job = payload.job.model_dump() if payload.job else None
+    try:
+        text, mode = ai_service.cv_summary(profile, job, payload.headline), "ai"
+    except Exception as exc:
+        log.info("CV summary from offline template (%s)", type(exc).__name__)
+        text, mode = career_service.offline_cv_summary(profile, job, payload.headline), "offline"
+    return {"summary": text, "mode": mode}

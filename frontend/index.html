@@ -29,6 +29,7 @@
       </ul>
       <div class="nav-actions">
         <button class="theme-toggle" type="button" data-action="toggle-theme" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
+        <button class="btn-ghost coach-link" type="button" data-action="open-coach">💬 Career Coach</button>
         <button class="btn-primary" type="button" data-action="show-app">Get Started</button>
       </div>
     </nav>
@@ -64,7 +65,9 @@
         <div class="feature-card"><div class="icon">📊</div><h3>Skill Gap Engine</h3><p>See which required skills to learn first and which nice-to-haves would help.</p></div>
         <div class="feature-card"><div class="icon">🗺️</div><h3>Personalized Learning Plan</h3><p>An actionable 7-day plan with official documentation links.</p></div>
         <div class="feature-card"><div class="icon">✍️</div><h3>Resume Improvement</h3><p>Role-specific suggestions that never invent experience you don't have.</p></div>
-        <div class="feature-card"><div class="icon">🎤</div><h3>Interview Simulator</h3><p>Practice technical, behavioral and scenario questions with scored feedback.</p></div>
+        <div class="feature-card"><div class="icon">🎤</div><h3>Interview Simulator</h3><p>Easy, Medium and Hard questions for your target role, with scored feedback.</p></div>
+        <div class="feature-card"><div class="icon">📝</div><h3>CV Builder</h3><p>Pick a template, fill any missing details, and download a polished PDF CV.</p></div>
+        <div class="feature-card"><div class="icon">💬</div><h3>Career Coach Chat</h3><p>Short, personal answers about roles, skills, CVs and interviews — any time.</p></div>
       </div>
     </div>
 
@@ -104,6 +107,7 @@
         <button type="button" class="nav-item" data-page="skills">🎯 Skill Gap</button>
         <button type="button" class="nav-item" data-page="learning">🗺️ Learning</button>
         <button type="button" class="nav-item" data-page="interview">🎤 Interview</button>
+        <button type="button" class="nav-item" data-page="cv">📝 CV Builder</button>
       </nav>
 
       <div class="side-footer">
@@ -116,6 +120,7 @@
       <header class="topbar">
         <h2 id="page-title">Dashboard</h2>
         <div class="topbar-right">
+          <button class="coach-btn" type="button" data-action="open-coach" title="Talk to our Career Coach for your career growth">💬 <span class="coach-btn-text">Talk to our Career Coach</span></button>
           <button class="theme-toggle" type="button" data-action="toggle-theme" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
           <div class="readiness-badge" title="Average of the four readiness measures on the dashboard">
             <span>Readiness</span>
@@ -153,6 +158,8 @@
               <button type="button" class="qa" data-page="jobs">💼 Explore Roles</button>
               <button type="button" class="qa" data-page="learning">🗺️ Generate Plan</button>
               <button type="button" class="qa" data-page="interview">🎤 Practice Interview</button>
+              <button type="button" class="qa" data-page="cv">📝 Build My CV</button>
+              <button type="button" class="qa" data-action="open-coach">💬 Ask the Career Coach</button>
             </div>
           </div>
         </section>
@@ -288,6 +295,15 @@
             <div class="target-bar"></div>
             <h3>Interview Simulator</h3>
             <p class="muted">Questions are tailored to your target role and rotate between technical, behavioral and scenario types.</p>
+            <div class="difficulty-row">
+              <span class="difficulty-label" id="difficulty-label">Difficulty</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="difficulty-label">
+                <button type="button" role="radio" class="seg-btn" data-action="set-difficulty" data-level="easy" aria-checked="false">🟢 Easy</button>
+                <button type="button" role="radio" class="seg-btn" data-action="set-difficulty" data-level="medium" aria-checked="true">🟡 Medium</button>
+                <button type="button" role="radio" class="seg-btn" data-action="set-difficulty" data-level="hard" aria-checked="false">🔴 Hard</button>
+              </div>
+              <span class="muted small-note" id="difficulty-hint"></span>
+            </div>
             <div class="interview-box">
               <div class="q-block">
                 <span class="q-label" id="q-label">Question</span>
@@ -309,9 +325,102 @@
           </div>
         </section>
 
+        <!-- -------- CV BUILDER -------- -->
+        <section id="page-cv" class="page">
+          <div class="panel">
+            <h3>CV Builder</h3>
+            <p class="muted">Choose a template, check your details, then generate and download your CV as a PDF. Your details stay in this browser.</p>
+            <h4 class="step-title"><span class="step-num">1</span> Choose a template</h4>
+            <div id="templateGrid" class="template-grid" role="radiogroup" aria-label="CV templates"></div>
+            <div class="accent-row">
+              <span class="muted">Accent colour:</span>
+              <div id="accentPicker" class="accent-picker" role="radiogroup" aria-label="Accent colour"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h4 class="step-title"><span class="step-num">2</span> Your details</h4>
+              <button type="button" class="btn-ghost" data-action="cv-prefill">↻ Refill from my profile</button>
+            </div>
+            <p class="muted small-note">Fields marked <span class="req">*</span> are needed for a complete CV.</p>
+            <form id="cvForm" class="cv-form" autocomplete="on">
+              <div class="cv-grid">
+                <label>Full name <span class="req">*</span><input data-cv="name" id="cv-name" type="text" maxlength="120" autocomplete="name" /></label>
+                <label>Headline / job title<input data-cv="headline" id="cv-headline" type="text" maxlength="120" placeholder="e.g. Digital Marketing Executive" /></label>
+                <label>Email <span class="req">*</span><input data-cv="email" id="cv-email" type="email" maxlength="120" autocomplete="email" /></label>
+                <label>Phone <span class="req">*</span><input data-cv="phone" id="cv-phone" type="tel" maxlength="40" autocomplete="tel" /></label>
+                <label>Location <span class="req">*</span><input data-cv="location" id="cv-location" type="text" maxlength="120" placeholder="City, Country" /></label>
+                <label>LinkedIn<input data-cv="linkedin" id="cv-linkedin" type="url" maxlength="200" placeholder="https://linkedin.com/in/…" /></label>
+                <label>Website / portfolio<input data-cv="website" id="cv-website" type="url" maxlength="200" placeholder="https://…" /></label>
+              </div>
+              <label class="full">Professional summary <span class="req">*</span>
+                <textarea data-cv="summary" id="cv-summary" rows="3" maxlength="900" placeholder="2–3 sentences about who you are and what you offer."></textarea>
+              </label>
+              <button type="button" class="link-btn" data-action="cv-ai-summary" id="cvSummaryBtn">✨ Write my summary for me</button>
+              <label class="full">Skills <span class="req">*</span> <span class="muted">(comma separated)</span>
+                <textarea data-cv="skills" id="cv-skills" rows="2" maxlength="1200"></textarea>
+              </label>
+
+              <div class="cv-section-head"><h5>Experience</h5><button type="button" class="btn-ghost sm-inline" data-action="cv-add" data-list="experience">+ Add experience</button></div>
+              <div id="cv-experience" class="cv-entries"></div>
+              <div class="cv-section-head"><h5>Education <span class="req">*</span></h5><button type="button" class="btn-ghost sm-inline" data-action="cv-add" data-list="education">+ Add education</button></div>
+              <div id="cv-education" class="cv-entries"></div>
+              <div class="cv-section-head"><h5>Projects</h5><button type="button" class="btn-ghost sm-inline" data-action="cv-add" data-list="projects">+ Add project</button></div>
+              <div id="cv-projects" class="cv-entries"></div>
+
+              <div class="cv-grid">
+                <label>Certifications <span class="muted">(one per line)</span><textarea data-cv="certifications" id="cv-certifications" rows="3" maxlength="1200"></textarea></label>
+                <label>Languages <span class="muted">(comma separated)</span><textarea data-cv="languages" id="cv-languages" rows="3" maxlength="300" placeholder="e.g. English, Urdu"></textarea></label>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h4 class="step-title"><span class="step-num">3</span> Generate your CV</h4>
+            <div id="cvMissing" class="cv-missing hidden" role="alert"></div>
+            <div class="row-actions">
+              <button type="button" class="btn-primary" data-action="cv-generate">Generate CV</button>
+            </div>
+            <div id="cvResult" class="hidden">
+              <div class="row-actions">
+                <button type="button" class="btn-primary" data-action="cv-download">⬇ Download PDF</button>
+                <button type="button" class="btn-ghost" data-action="cv-edit">✎ Edit details</button>
+              </div>
+              <p class="muted small-note">In the print window choose <b>Save as PDF</b> as the destination.</p>
+              <div class="cv-preview-wrap"><div id="cvPreview" class="cv-preview"></div></div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
   </div>
+
+  <!-- ============ CAREER COACH CHAT ============ -->
+  <aside id="coach" class="coach hidden" role="dialog" aria-modal="false" aria-labelledby="coach-title">
+    <header class="coach-head">
+      <div>
+        <b id="coach-title">💬 Career Coach</b>
+        <span class="muted">Short, personal advice for your career growth</span>
+      </div>
+      <div class="coach-head-actions">
+        <button type="button" class="link-btn" data-action="new-chat">New chat</button>
+        <button type="button" class="coach-close" data-action="close-coach" aria-label="Close chat">✕</button>
+      </div>
+    </header>
+    <div id="coachMessages" class="coach-messages" aria-live="polite"></div>
+    <div id="coachSuggestions" class="coach-suggestions"></div>
+    <form id="coachForm" class="coach-form">
+      <label for="coachInput" class="visually-hidden">Your question</label>
+      <textarea id="coachInput" rows="1" maxlength="1500" placeholder="Ask about roles, skills, your CV, interviews…"></textarea>
+      <button type="submit" class="btn-primary" id="coachSend">Send</button>
+    </form>
+    <p class="coach-foot muted">Guidance only — double-check important decisions.</p>
+  </aside>
+
+  <!-- Filled only when printing the CV -->
+  <div id="cvPrint" class="cv-print" aria-hidden="true"></div>
 
   <script src="config.js"></script>
   <script src="script.js"></script>

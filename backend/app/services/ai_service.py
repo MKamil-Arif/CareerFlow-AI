@@ -23,23 +23,28 @@ class AIUnavailable(RuntimeError):
 
 
 # ---------------------------------------------------------------- providers
+# Both providers are called over plain HTTPS with httpx, so the app does not
+# need the (much larger) Groq and Google SDKs.
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+
 @lru_cache(maxsize=1)
-def _groq_client():
-    from groq import Groq
+def _http():
+    import httpx
 
-    return Groq(api_key=settings.groq_api_key, timeout=settings.ai_timeout_seconds, max_retries=1)
+    return httpx.Client(timeout=httpx.Timeout(settings.ai_timeout_seconds, connect=10))
 
 
-@lru_cache(maxsize=1)
-def _gemini_client():
-    from google import genai
-
-    return genai.Client(api_key=settings.gemini_api_key)
+def _post(url: str, headers: dict[str, str], body: dict[str, Any]) -> dict[str, Any]:
+    response = _http().post(url, headers=headers, json=body)
+    if response.status_code >= 400:
+        raise RuntimeError(f"HTTP {response.status_code}: {response.text[:300]}")
+    return response.json()
 
 
 def _call_groq(prompt: str, max_tokens: int, temperature: float) -> str:
-    client = _groq_client()
-    params: dict[str, Any] = {
+    body: dict[str, Any] = {
         "model": settings.groq_model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": temperature,
@@ -48,35 +53,30 @@ def _call_groq(prompt: str, max_tokens: int, temperature: float) -> str:
     if settings.groq_model.startswith("openai/gpt-oss"):
         # Reasoning models spend tokens "thinking" before answering; without
         # headroom the visible answer can come back empty.
-        params["max_tokens"] = max_tokens + 1500
-        params["reasoning_effort"] = "low"
+        body["max_tokens"] = max_tokens + 1500
+        body["reasoning_effort"] = "low"
+    headers = {"Authorization": f"Bearer {settings.groq_api_key}"}
     try:
-        response = client.chat.completions.create(**params)
-    except Exception as exc:  # retry once without optional reasoning params
-        if "reasoning" in str(exc).lower() and "reasoning_effort" in params:
-            params.pop("reasoning_effort")
-            response = client.chat.completions.create(**params)
-        else:
+        data = _post(GROQ_URL, headers, body)
+    except RuntimeError as exc:  # retry once without the optional reasoning parameter
+        if "reasoning" not in str(exc).lower() or "reasoning_effort" not in body:
             raise
-    text = (response.choices[0].message.content or "").strip()
-    if not text:
+        body.pop("reasoning_effort")
+        data = _post(GROQ_URL, headers, body)
+    text = ((data.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
+    if not text.strip():
         raise ValueError("Groq returned an empty answer")
-    return text
+    return text.strip()
 
 
 def _call_gemini(prompt: str, max_tokens: int, temperature: float) -> str:
-    client = _gemini_client()
-    text = ""
-    if hasattr(client, "interactions"):
-        interaction = client.interactions.create(model=settings.gemini_model, input=prompt)
-        text = getattr(interaction, "output_text", "") or ""
-    if not text and hasattr(client, "models"):
-        response = client.models.generate_content(model=settings.gemini_model, contents=prompt)
-        text = getattr(response, "text", "") or ""
-    text = text.strip()
-    if not text:
+    body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": {"temperature": temperature}}
+    data = _post(GEMINI_URL.format(model=settings.gemini_model), {"x-goog-api-key": settings.gemini_api_key}, body)
+    parts = (((data.get("candidates") or [{}])[0].get("content") or {}).get("parts")) or []
+    text = "".join(p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought"))
+    if not text.strip():
         raise ValueError("Gemini returned an empty answer")
-    return text
+    return text.strip()
 
 
 def complete(prompt: str, *, max_tokens: int = 800, temperature: float = 0.3) -> str:
@@ -175,28 +175,48 @@ Do not include URLs. Return ONLY a JSON object: {{"tasks": [{{"skill": "", "titl
     ]
 
 
+DIFFICULTY_GUIDE = {
+    "easy": ("EASY: a basic, friendly question a fresher can answer from fundamentals. "
+             "One single question, no multi-part. Maximum 18 words."),
+    "medium": ("MEDIUM: a practical question about applying a skill in a realistic work situation. "
+               "One question, at most two parts. Maximum 28 words."),
+    "hard": ("HARD: an in-depth question needing trade-offs, judgement or a tricky scenario, as asked to experienced candidates. "
+             "Maximum 40 words."),
+}
+WORD_LIMIT = {"easy": 22, "medium": 34, "hard": 48}
+
+
 def interview_question(profile: dict, job_title: str, previous: list[str], requirements: str,
-                       question_type: str, context: list[str]) -> str:
+                       question_type: str, context: list[str], difficulty: str = "medium") -> str:
     prompt = f"""Write ONE {question_type} interview practice question for a "{job_title}" role.
+Difficulty — {DIFFICULTY_GUIDE.get(difficulty, DIFFICULTY_GUIDE['medium'])}
+Use plain, simple English. No preamble, no numbering, no explanation.
 Role requirements: {requirements or 'not listed'}.
 Interview guidance: {' | '.join(context) or 'none'}.
 {UNTRUSTED}
 <data>Candidate skills: {', '.join(profile.get('skills', []))}</data>
 Do not repeat any of these earlier questions: {' | '.join(previous[-10:]) or 'none'}.
-Return only the question text, nothing else."""
+Return only the question text."""
     question = complete(prompt, max_tokens=200, temperature=0.6).strip().strip('"').strip()
+    question = question.splitlines()[0].strip() if question else ""
     if len(question) < 10:
         raise ValueError("Question too short")
-    return question[:600]
+    if len(question.split()) > WORD_LIMIT.get(difficulty, 34) + 10:
+        raise ValueError("Question too long for the chosen difficulty")
+    return question[:400]
 
 
-def evaluate_answer(question: str, answer: str, job_title: str) -> dict[str, Any]:
-    prompt = f"""Evaluate a practice interview answer for a "{job_title}" role. {UNTRUSTED}
+def evaluate_answer(question: str, answer: str, job_title: str, difficulty: str = "medium") -> dict[str, Any]:
+    level = {"easy": "This was an EASY question: expect a short, basic answer and score generously for correct fundamentals.",
+             "medium": "This was a MEDIUM question: expect a practical answer with an example.",
+             "hard": "This was a HARD question: expect depth, trade-offs and a clear structure."}.get(difficulty, "")
+    prompt = f"""Evaluate a practice interview answer for a "{job_title}" role. {level} {UNTRUSTED}
 Question: {question[:1000]}
 <data>
 {answer[:6000]}
 </data>
-Score integers 0-10: correctness (technical accuracy), completeness (context, action, outcome), clarity (organised, concise).
+Score integers 0-10: correctness (accuracy), completeness (covers what the question needs), clarity (organised, concise).
+Keep "feedback" to 2 short sentences and "improved_answer" under 70 words, in simple English.
 Return ONLY a JSON object: {{"correctness": 0, "completeness": 0, "clarity": 0, "feedback": "", "improved_answer": ""}}"""
     data = extract_json(complete(prompt, max_tokens=700, temperature=0.2))
     if not isinstance(data, dict):
@@ -333,3 +353,60 @@ Return ONLY a JSON object: {ROLE_SCHEMA}  (keep "title" as close to "{title}" as
         raise ValueError("Expected a role object")
     data["title"] = data.get("title") or title
     return normalize_role(data, "custom", profile.get("location", ""))
+
+
+# ---------------------------------------------------------------- career coach chat
+CHAT_RULES = """You are "CareerFlow Coach", a friendly career-growth assistant.
+Rules:
+- Answer in at most 90 words. Prefer 2-4 short bullet points or 2-3 short sentences. Simple English.
+- Personalise using the user's profile and target role when relevant; refer to their real skills and gaps.
+- Give practical next steps. Never invent facts about the user. For salaries, give only rough ranges with a caveat and suggest checking local job boards.
+- If asked something unrelated to careers, studies or work, reply in one sentence and steer back to career topics.
+- Do not use headings. Use **bold** sparingly. No preamble like "Great question"."""
+
+
+def chat_reply(messages: list[dict[str, str]], profile: dict | None, job: dict | None, gaps: dict | None) -> str:
+    context = []
+    if profile:
+        context.append(_profile_block(profile))
+    if job:
+        context.append(f"Target role: {job.get('title')} ({job.get('field', '')}). Requires: {', '.join(job.get('required_skills', []))}.")
+    if gaps:
+        context.append(f"Missing required skills: {', '.join(gaps.get('missing', [])) or 'none'}. "
+                       f"Nice-to-have skills to add: {', '.join(gaps.get('improve', [])) or 'none'}.")
+    transcript = "\n".join(f"{'User' if m['role'] == 'user' else 'Coach'}: {m['content'][:1500]}" for m in messages[-10:])
+    prompt = f"""{CHAT_RULES}
+{UNTRUSTED}
+<data>
+User context:
+{chr(10).join(context) or 'No profile uploaded yet.'}
+
+Conversation so far:
+{transcript}
+</data>
+Write the Coach's next reply only."""
+    reply = complete(prompt, max_tokens=400, temperature=0.5).strip()
+    if reply.lower().startswith("coach:"):
+        reply = reply[6:].strip()
+    if not reply:
+        raise ValueError("Empty reply")
+    words = reply.split()
+    if len(words) > 160:  # hard cap so answers stay quick to read
+        reply = " ".join(words[:150]).rstrip(",;:") + "…"
+    return reply[:1500]
+
+
+def cv_summary(profile: dict, job: dict | None, headline: str) -> str:
+    target = f'They are targeting "{job["title"]}".' if job else ""
+    prompt = f"""Write a professional CV summary (2-3 sentences, 40-60 words, first person implied, no "I") for this candidate. {target}
+Use only facts from the profile. Do not invent employers, years, numbers or achievements. Simple, confident English.
+{UNTRUSTED}
+<data>
+Headline: {headline or 'not given'}
+{_profile_block(profile)}
+</data>
+Return only the summary text."""
+    text = complete(prompt, max_tokens=250, temperature=0.4).strip().strip('"')
+    if len(text.split()) < 12:
+        raise ValueError("Summary too short")
+    return " ".join(text.split()[:90])

@@ -49,7 +49,7 @@ class Settings:
 
     max_upload_mb: int = field(default_factory=lambda: _int("MAX_UPLOAD_MB", 5))
     # Requests per minute, per client IP. 0 disables the limit.
-    rate_limit_ai_per_minute: int = field(default_factory=lambda: _int("RATE_LIMIT_AI_PER_MINUTE", 20))
+    rate_limit_ai_per_minute: int = field(default_factory=lambda: _int("RATE_LIMIT_AI_PER_MINUTE", 30))
     rate_limit_default_per_minute: int = field(default_factory=lambda: _int("RATE_LIMIT_DEFAULT_PER_MINUTE", 120))
 
     @property

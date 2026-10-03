@@ -124,21 +124,57 @@ def build_plan(job: dict[str, Any], targets: list[str], ai_tasks: list[dict[str,
 QUESTION_TYPES = ("technical", "behavioral", "scenario")
 
 OFFLINE_QUESTIONS = {
-    "technical": [
-        "How would you use {skill} in your day-to-day work as a {title}? What does good work look like, and what is one common mistake?",
-        "Walk me through how you would solve a problem at work that involves {skill}. What steps would you take?",
-        "How would you check that your {skill} work is accurate and high quality before handing it over?",
-    ],
-    "behavioral": [
-        "Tell me about a project where you learned a new skill quickly. What was the situation, what did you do, and what was the result?",
-        "Describe a time you received critical feedback on your work. How did you respond?",
-        "Tell me about a time you worked in a team and disagreed on an approach. How was it resolved?",
-    ],
-    "scenario": [
-        "You join as a {title} and find a task that needs {skill}, which you have only used a little. How do you deliver it on time?",
-        "A deadline is two days away and a key feature is broken. As a {title}, what steps do you take?",
-        "A stakeholder asks for a change that conflicts with the original requirements. As a {title}, how do you handle it?",
-    ],
+    "easy": {
+        "technical": [
+            "What is {skill}, in simple words?",
+            "Why is {skill} useful for a {title}?",
+            "Name one task where you would use {skill}.",
+        ],
+        "behavioral": [
+            "Tell me a little about yourself.",
+            "Why do you want to work as a {title}?",
+            "What is one strength you bring to a team?",
+        ],
+        "scenario": [
+            "Your manager gives you a task you don't understand. What do you do first?",
+            "You made a small mistake in your work. How would you handle it?",
+            "You have two tasks due today. How do you decide which to do first?",
+        ],
+    },
+    "medium": {
+        "technical": [
+            "Describe how you have used {skill} in a project or task.",
+            "What is a common mistake with {skill}, and how do you avoid it?",
+            "How would you check that your {skill} work is correct before sharing it?",
+        ],
+        "behavioral": [
+            "Tell me about a time you learned something new quickly. What did you do?",
+            "Describe a time you received feedback. How did you respond?",
+            "Tell me about a time you worked in a team to finish something on time.",
+        ],
+        "scenario": [
+            "As a {title}, a task needs {skill}, which you've only used a little. How do you deliver it?",
+            "A deadline is two days away and something important is broken. What steps do you take?",
+            "A client asks for a change that conflicts with the original plan. How do you handle it?",
+        ],
+    },
+    "hard": {
+        "technical": [
+            "Explain a complex problem you solved with {skill}. What trade-offs did you weigh, and what would you do differently?",
+            "How would you teach {skill} to a new teammate and measure whether they really understood it?",
+            "Compare two different ways to approach a {skill} task. When would you choose each?",
+        ],
+        "behavioral": [
+            "Tell me about a time you disagreed with a senior colleague. How did you handle it, and what was the outcome?",
+            "Describe your biggest professional failure, what caused it, and what you changed afterwards.",
+            "Tell me about a time you had to lead without formal authority. How did you get people on board?",
+        ],
+        "scenario": [
+            "As a {title}, your project is behind schedule, the budget is cut and a key teammate leaves. What is your plan for the next two weeks?",
+            "Two stakeholders want opposite things and both are senior. As a {title}, how do you decide and communicate it?",
+            "You discover an error in work that has already been delivered to a client. What do you do, step by step?",
+        ],
+    },
 }
 
 
@@ -146,10 +182,10 @@ def question_type(previous: list[str]) -> str:
     return QUESTION_TYPES[len(previous) % len(QUESTION_TYPES)]
 
 
-def offline_question(job: dict[str, Any] | None, title: str, previous: list[str]) -> str:
+def offline_question(job: dict[str, Any] | None, title: str, previous: list[str], difficulty: str = "medium") -> str:
     qtype = question_type(previous)
     skills = (job or {}).get("required_skills", []) or ["the main tools of the role"]
-    templates = OFFLINE_QUESTIONS[qtype]
+    templates = OFFLINE_QUESTIONS.get(difficulty, OFFLINE_QUESTIONS["medium"])[qtype]
     for n in range(len(templates) * len(skills)):
         candidate = templates[(len(previous) // 3 + n) % len(templates)].format(
             title=title, skill=skills[(len(previous) + n) % len(skills)])
@@ -162,10 +198,12 @@ def interview_context(job_title: str, requirements: str) -> list[str]:
     return search_service.retrieve_context(f"{job_title} {requirements}", ("interviews", "careers"), 3)
 
 
-def offline_evaluate(question: str, answer: str, job: dict[str, Any] | None) -> dict[str, Any]:
+def offline_evaluate(question: str, answer: str, job: dict[str, Any] | None, difficulty: str = "medium") -> dict[str, Any]:
     """Transparent heuristic rubric used when no AI provider is available."""
     words = re.findall(r"\w+", answer)
-    count = len(words)
+    # Easy questions need shorter answers; hard ones need more depth.
+    scale = {"easy": 2.0, "medium": 1.0, "hard": 0.75}.get(difficulty, 1.0)
+    count = int(len(words) * scale)
     lower = answer.lower()
     sentences = max(1, len(re.findall(r"[.!?]+", answer)))
     job_skills = [s for s in ((job or {}).get("required_skills", []) + (job or {}).get("preferred_skills", []))]
@@ -184,29 +222,35 @@ def offline_evaluate(question: str, answer: str, job: dict[str, Any] | None) -> 
         base = 6
     correctness = min(10, base + min(3, len(skill_hits)) + (1 if has_action else 0))
     completeness = min(10, base + has_context * 1 + has_action * 1 + has_result * 2)
-    avg_sentence = count / sentences
+    avg_sentence = len(words) / sentences
     clarity = min(10, max(1, base + (2 if 8 <= avg_sentence <= 28 else 0) + (1 if count <= 350 else -1)))
 
+    target = {"easy": "30–80", "medium": "80–200", "hard": "150–300"}.get(difficulty, "80–200")
     tips = []
     if count < 40:
-        tips.append("Give a fuller answer — aim for 80–250 words.")
-    if not has_context:
-        tips.append("Start with the situation or project context.")
-    if not has_action:
-        tips.append("Say clearly what *you* did (\"I built…\", \"I tested…\").")
-    if not has_result:
-        tips.append("Finish with a concrete, verifiable result.")
+        tips.append(f"Give a fuller answer — aim for {target} words.")
+    if difficulty != "easy":
+        if not has_context:
+            tips.append("Start with the situation or context.")
+        if not has_action:
+            tips.append("Say clearly what you did (\"I built…\", \"I organised…\").")
+        if not has_result:
+            tips.append("Finish with a concrete result.")
+    else:
+        completeness = min(10, completeness + 2)
     if job_skills and not skill_hits:
         tips.append("Connect your answer to the role's skills, e.g. " + ", ".join(job_skills[:3]) + ".")
+    tips = tips[:3]
     if not tips:
-        tips.append("Good structure. Tighten wording and keep claims to what you can back up.")
+        tips.append("Good answer. Keep it this clear and back up claims with examples.")
 
     return {
         "correctness": correctness,
         "completeness": completeness,
         "clarity": clarity,
-        "feedback": "Offline rubric (no AI provider available): " + " ".join(tips),
-        "improved_answer": "Structure it as: context (situation) → your task → the actions you took and why → the result you can verify.",
+        "feedback": "Offline rubric: " + " ".join(tips),
+        "improved_answer": ("Answer directly in 2–4 sentences, then add one short example." if difficulty == "easy" else
+                            "Structure it as: situation → your task → what you did and why → the result."),
     }
 
 
@@ -292,3 +336,79 @@ def offline_custom_role(profile: dict[str, Any], title: str) -> tuple[dict[str, 
     role.update({"field": "", "description": f"Your target role: {title}.", "required_skills": GENERIC_SKILLS,
                  "preferred_skills": [], "education_requirements": "", "experience_requirements": ""})
     return role, "AI was unavailable and this role isn't in the offline catalog, so only general workplace skills are listed."
+
+
+# ---------------------------------------------------------------- career coach (offline)
+def coach_suggestions(job: dict[str, Any] | None, has_profile: bool) -> list[str]:
+    if not has_profile:
+        return ["How do I start my career search?", "What makes a good CV?", "How do I prepare for interviews?"]
+    title = job["title"] if job else "my target role"
+    return [f"What should I learn first for {title}?", f"How do I prepare for a {title} interview?",
+            "How can I improve my CV?", "Which roles fit my profile?"]
+
+
+def offline_coach(message: str, profile: dict[str, Any] | None, job: dict[str, Any] | None, gaps: dict[str, Any] | None) -> str:
+    """Short, rule-based answers when no AI provider is available."""
+    text = message.lower()
+    title = job["title"] if job else None
+    skills = (profile or {}).get("skills", [])
+
+    def has(*words):
+        return any(re.search(rf"\b{w}", text) for w in words)
+
+    if has("hi", "hello", "salam", "hey") and len(text.split()) <= 4:
+        return ("Hi! I'm your CareerFlow Coach. Ask me about roles that fit you, skills to learn, your CV, or interview prep."
+                + ("" if profile else " Upload your CV first so I can personalise my advice."))
+    if has("interview"):
+        lines = ["- Practise on the **Interview** page — start at **Easy**, then move up.",
+                 "- Use the STAR shape: situation, task, action, result.",
+                 "- Prepare 2–3 real examples from your projects or work."]
+        if gaps and gaps.get("have"):
+            lines.append(f"- Be ready to explain how you used {', '.join(gaps['have'][:2])}.")
+        return (f"For {title} interviews:\n" if title else "") + "\n".join(lines)
+    if has("learn", "skill", "gap", "improve myself", "course", "study"):
+        if gaps and gaps.get("missing"):
+            first = gaps["missing"][:3]
+            return (f"For {title}, focus on **{', '.join(first)}** first (required, but not yet in your profile).\n"
+                    "- Follow your 7-day plan on the **Learning** page.\n- Build one small project that shows each skill.")
+        if gaps and gaps.get("improve"):
+            return f"You cover the required skills for {title}. Next, add **{', '.join(gaps['improve'][:2])}** to stand out."
+        return "Pick a target role on the **Jobs** page — I'll then tell you exactly which skills to learn first."
+    if has("cv", "resume", "résumé"):
+        tips = ["- Keep it to one page with clear headings.",
+                "- Start each experience line with an action verb and a result.",
+                "- Put skills that match your target role near the top."]
+        if profile and not profile.get("projects"):
+            tips.append("- Add 1–2 projects with links — you have none listed yet.")
+        return "Quick CV wins:\n" + "\n".join(tips[:4]) + "\nUse the **CV Builder** to generate a clean version."
+    if has("salary", "pay", "earn", "income"):
+        return ("Salaries vary a lot by city, company and experience. Check current listings for the same title on local job boards "
+                "and ask peers in the field. Building in-demand skills is the surest way to raise your range.")
+    if has("role", "job", "career", "switch", "field", "fit"):
+        if profile:
+            roles, _ = offline_recommend(profile, "", [], 3)
+            return ("Based on your profile, look at: " + ", ".join(f"**{r['title']}**" for r in roles) +
+                    ". See scores and missing skills on the **Jobs** page, or type your own target role there.")
+        return "Upload your CV on the **Resume** page and I'll suggest roles that fit your background."
+    if has("motivat", "stress", "reject", "confiden", "anxious", "nervous"):
+        return ("Rejections are normal — most people apply to many roles before an offer. Set a small weekly goal "
+                "(e.g. 5 tailored applications + 1 new skill), track progress, and celebrate small wins.")
+    base = "I can help with roles that fit you, skills to learn, your CV, and interview practice."
+    if skills:
+        base += f" With skills like {', '.join(skills[:3])}, a good next step is choosing a target role on the **Jobs** page."
+    return base + " (AI is offline right now, so my answers are simpler than usual.)"
+
+
+def offline_cv_summary(profile: dict[str, Any], job: dict[str, Any] | None, headline: str) -> str:
+    level = {"Entry": "Motivated", "Mid": "Experienced", "Senior": "Senior"}.get(profile.get("career_level", "Entry"), "Motivated")
+    role = headline or "professional"
+    skills = profile.get("skills", [])[:4]
+    edu = profile.get("education", [])
+    parts = [f"{level} {role}" + (f" skilled in {', '.join(skills[:-1])} and {skills[-1]}" if len(skills) > 1 else (f" skilled in {skills[0]}" if skills else "")) + "."]
+    if edu:
+        parts.append(f"Holds {edu[0].split('—')[0].split(' - ')[0].strip()}.")
+    if profile.get("projects") or profile.get("experience"):
+        parts.append("Brings hands-on experience from real projects and a strong willingness to learn.")
+    if job:
+        parts.append(f"Looking to contribute as a {job['title']}.")
+    return " ".join(parts)

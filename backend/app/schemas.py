@@ -90,6 +90,7 @@ class InterviewStartPayload(ProfilePayload):
     job_title: str = Field(min_length=1, max_length=160)
     job_id: Optional[int] = Field(default=None, ge=1)
     job: Optional[Role] = None
+    difficulty: Literal["easy", "medium", "hard"] = "medium"
     previous: List[Annotated[str, StringConstraints(max_length=1000)]] = Field(default_factory=list, max_length=30)
 
 
@@ -99,3 +100,27 @@ class InterviewEvalPayload(BaseModel):
     job_title: str = Field(min_length=1, max_length=160)
     job_id: Optional[int] = Field(default=None, ge=1)
     job: Optional[Role] = None
+    difficulty: Literal["easy", "medium", "hard"] = "medium"
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=1500)
+
+
+class ChatPayload(BaseModel):
+    messages: List[ChatMessage] = Field(min_length=1, max_length=12)
+    profile: Optional[Profile] = None
+    job: Optional[Role] = None
+
+    @field_validator("messages", mode="after")
+    @classmethod
+    def _last_is_user(cls, messages):
+        if messages[-1].role != "user":
+            raise ValueError("the last message must be from the user")
+        return messages
+
+
+class SummaryPayload(ProfilePayload):
+    job: Optional[Role] = None
+    headline: str = Field(default="", max_length=120)

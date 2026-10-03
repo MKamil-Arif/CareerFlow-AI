@@ -106,18 +106,6 @@ def job_text(job: dict[str, Any]) -> str:
                      *job.get("required_skills", []), *job.get("preferred_skills", [])])
 
 
-def job_similarities(query: str) -> dict[int, float]:
-    """Similarity (0..1) between a profile query and every curated job."""
-    results = index().search(query, ("jobs",), limit=len(knowledge.jobs()) or 1)
-    out: dict[int, float] = {}
-    for doc, score in results:
-        try:
-            out[int(doc.id)] = score
-        except ValueError:
-            continue
-    return out
-
-
 def retrieve_context(query: str, kinds: tuple[str, ...], limit: int = 3) -> list[str]:
     """Short text snippets from the curated data to ground AI prompts."""
     return [doc.text[:600] for doc, score in index().search(query, kinds, limit) if score > 0]

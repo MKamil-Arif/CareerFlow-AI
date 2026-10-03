@@ -1,6 +1,8 @@
 """Text extraction from uploaded PDF resumes (kept in memory, never saved)."""
 from __future__ import annotations
 
+import io
+
 MAX_PAGES = 10
 
 
@@ -9,13 +11,13 @@ class PdfError(ValueError):
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
-    import pymupdf  # imported lazily so the rest of the app works without it in tests
+    from pypdf import PdfReader  # small, pure-Python PDF library
 
     try:
-        with pymupdf.open(stream=file_bytes, filetype="pdf") as doc:
-            if doc.needs_pass:
-                raise PdfError("The PDF is password-protected.")
-            parts = [page.get_text() for page in doc.pages(0, min(doc.page_count, MAX_PAGES))]
+        reader = PdfReader(io.BytesIO(file_bytes))
+        if reader.is_encrypted and not reader.decrypt(""):
+            raise PdfError("The PDF is password-protected.")
+        parts = [(page.extract_text() or "") for page in reader.pages[:MAX_PAGES]]
     except PdfError:
         raise
     except Exception as exc:

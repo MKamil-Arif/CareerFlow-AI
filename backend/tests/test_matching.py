@@ -1,14 +1,13 @@
 from app.services import knowledge
-from app.services.matching_service import WEIGHTS, compute_structured_score, match_jobs, skill_gaps
+from app.services.matching_service import WEIGHTS, match_jobs, skill_gaps, skill_overlap
 
 
 def test_required_and_preferred_skills_are_reported():
     profile = {"skills": ["python", "git"], "education": [], "experience": [], "location": ""}
     job = {"required_skills": ["Python", "SQL"], "preferred_skills": ["Git"]}
-    score, matched, missing = compute_structured_score(profile, job)
-    assert score == 25
-    assert matched == ["Python", "Git"]
-    assert missing == ["SQL"]
+    o = skill_overlap(profile, job)
+    assert o["matched_required"] == ["Python"] and o["matched_preferred"] == ["Git"]
+    assert o["missing_required"] == ["SQL"] and o["missing_preferred"] == []
 
 
 def test_match_score_is_bounded_and_breakdown_adds_up():

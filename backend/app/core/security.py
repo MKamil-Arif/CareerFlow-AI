@@ -41,10 +41,6 @@ class RateLimiter:
                 for k in [k for k, v in self._hits.items() if not v or now - v[-1] > self.window]:
                     self._hits.pop(k, None)
 
-    def reset(self) -> None:
-        with self._lock:
-            self._hits.clear()
-
 
 ai_limiter = RateLimiter(settings.rate_limit_ai_per_minute)
 default_limiter = RateLimiter(settings.rate_limit_default_per_minute)

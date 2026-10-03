@@ -68,7 +68,7 @@ The container listens on `$PORT` (default 8000), so hosts that set `PORT` (Koyeb
 | `GEMINI_MODEL` | `gemini-3.7-flash` | Any Gemini model ID. |
 | `APP_ENV` | `development` (`production` in Docker) | `production` enables HSTS and turns off the localhost CORS defaults. |
 | `CORS_ORIGINS` | — | Only if the frontend is on another domain (comma separated). |
-| `RATE_LIMIT_AI_PER_MINUTE` | `20` | Per visitor IP, for endpoints that call AI. `0` turns the limit off. |
+| `RATE_LIMIT_AI_PER_MINUTE` | `30` | Per visitor IP, for endpoints that call AI. `0` turns the limit off. |
 | `RATE_LIMIT_DEFAULT_PER_MINUTE` | `120` | Per visitor IP, for everything else. |
 | `MAX_UPLOAD_MB` | `5` | Largest resume PDF accepted. |
 | `AI_TIMEOUT_SECONDS` | `25` | Time allowed for each AI provider call. |

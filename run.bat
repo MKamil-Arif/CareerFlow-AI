@@ -26,5 +26,5 @@ popd
 echo.
 echo Starting CareerFlow AI at http://127.0.0.1:8000  (press Ctrl+C to stop)
 start "" cmd /c "timeout /t 4 /nobreak >nul & start http://127.0.0.1:8000"
-".venv\Scripts\python.exe" -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+".venv\Scripts\python.exe" -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --ws none
 pause
