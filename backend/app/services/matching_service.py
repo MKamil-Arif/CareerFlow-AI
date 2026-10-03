@@ -1,58 +1,169 @@
-"""Transparent weighted matching for curated jobs."""
+"""Transparent, weighted 0-100 matching between a profile and curated jobs."""
+from __future__ import annotations
+
 import re
-from app.services import rag_service
+from typing import Any
 
-WEIGHTS = {"required_skills": 40, "profile_similarity": 25, "education": 10, "experience": 10, "location": 10, "preferred_skills": 5}
+from app.services import search_service
+from app.services.skills import canonical
 
-def _norm(value):
-    return re.sub(r"[^a-z0-9+#.]", " ", str(value).lower()).strip()
+WEIGHTS = {
+    "required_skills": 40,
+    "profile_similarity": 25,
+    "education": 10,
+    "experience": 10,
+    "location": 10,
+    "preferred_skills": 5,
+}
 
-def compute_structured_score(profile, job):
-    """Compatibility API returning the structured portion and skill lists."""
-    user = {_norm(s) for s in profile.get("skills", [])}
+
+def skill_overlap(profile: dict[str, Any], job: dict[str, Any]) -> dict[str, list[str]]:
+    """Which required/preferred job skills the profile does and doesn't show."""
+    have = {canonical(s) for s in profile.get("skills", [])}
     required = job.get("required_skills", [])
     preferred = job.get("preferred_skills", [])
-    matched_req = [s for s in required if _norm(s) in user]
-    missing = [s for s in required if _norm(s) not in user]
-    matched_pref = [s for s in preferred if _norm(s) in user]
-    score = (len(matched_req) / max(len(required), 1)) * WEIGHTS["required_skills"]
-    score += (len(matched_pref) / max(len(preferred), 1)) * WEIGHTS["preferred_skills"]
-    return round(score), matched_req + matched_pref, missing
+    return {
+        "matched_required": [s for s in required if canonical(s) in have],
+        "missing_required": [s for s in required if canonical(s) not in have],
+        "matched_preferred": [s for s in preferred if canonical(s) in have],
+        "missing_preferred": [s for s in preferred if canonical(s) not in have],
+    }
 
-def _semantic_fallback(profile, job):
-    profile_text = " ".join(profile.get("skills", []) + profile.get("experience", []) + profile.get("projects", []))
-    job_text = " ".join([job.get("title", ""), job.get("description", ""), *job.get("required_skills", [])])
-    terms = {_norm(t) for t in profile_text.split() if len(t) > 2}
-    target = {_norm(t) for t in job_text.split() if len(t) > 2}
-    return len(terms & target) / max(len(target), 1)
 
-def _eligibility(profile, job):
-    required_edu = str(job.get("education_requirements", "")).lower()
-    education = " ".join(profile.get("education", [])).lower()
-    edu = 10 if not required_edu or "not specified" in required_edu else (10 if any(x in education for x in required_edu.split()) else 4 if education else 3)
-    wanted_exp = str(job.get("experience_requirements", "")).lower()
-    experience = " ".join(profile.get("experience", [])).lower()
-    exp = 10 if not wanted_exp or "entry" in wanted_exp or "not specified" in wanted_exp else (10 if experience else 4)
-    loc = str(job.get("location", "")).lower()
-    userloc = str(profile.get("location", "")).lower()
-    location = 10 if userloc and (userloc in loc or "remote" in loc) else (7 if "remote" in loc else 4 if userloc else 5)
-    return edu, exp, location
+def compute_structured_score(profile: dict[str, Any], job: dict[str, Any]) -> tuple[int, list[str], list[str]]:
+    """Skills-only portion of the score (max 45) plus matched and missing skills."""
+    o = skill_overlap(profile, job)
+    score = len(o["matched_required"]) / max(len(job.get("required_skills", [])), 1) * WEIGHTS["required_skills"]
+    score += len(o["matched_preferred"]) / max(len(job.get("preferred_skills", [])), 1) * WEIGHTS["preferred_skills"]
+    return round(score), o["matched_required"] + o["matched_preferred"], o["missing_required"]
 
-def match_jobs(profile, all_jobs, top_n=5):
-    query = " ".join([profile.get("career_level", "Entry"), *profile.get("skills", []), *profile.get("experience", []), *profile.get("projects", [])])
-    sem_ids, similarities = rag_service.search_knowledge(query, "jobs", max(top_n * 3, len(all_jobs)))
-    sem = {int(i): s for i, s in zip(sem_ids, similarities) if i.isdigit()}
+
+def _cities(value: str) -> set[str]:
+    words = re.findall(r"[a-z]+", value.lower())
+    return {w for w in words if w not in {"remote", "hybrid", "onsite", "on", "site", "pakistan"} and len(w) > 2}
+
+
+def eligibility(profile: dict[str, Any], job: dict[str, Any]) -> tuple[int, int, int]:
+    """Education, experience and location points (each out of 10)."""
+    has_education = bool(profile.get("education"))
+    has_experience = bool(profile.get("experience"))
+    has_projects = bool(profile.get("projects"))
+
+    edu_req = str(job.get("education_requirements", "")).lower()
+    if not edu_req or "not specified" in edu_req or has_education:
+        edu = 10
+    elif "equivalent" in edu_req and (has_experience or has_projects):
+        edu = 7
+    else:
+        edu = 3
+
+    exp_req = str(job.get("experience_requirements", "")).lower()
+    if not exp_req or "not specified" in exp_req or has_experience:
+        exp = 10
+    elif "entry" in exp_req:
+        exp = 10 if has_projects else 8
+    elif "project" in exp_req and has_projects:
+        exp = 8
+    else:
+        exp = 4
+
+    job_loc = str(job.get("location", ""))
+    user_loc = str(profile.get("location", ""))
+    if not job_loc.strip() or "flexible" in job_loc.lower() or "any" == job_loc.lower().strip():
+        loc = 8
+    elif "remote" in job_loc.lower():
+        loc = 10
+    elif user_loc and _cities(user_loc) & _cities(job_loc):
+        loc = 10
+    elif not user_loc:
+        loc = 5
+    else:
+        loc = 3
+    return edu, exp, loc
+
+
+def profile_query(profile: dict[str, Any]) -> str:
+    return " ".join([
+        profile.get("career_level", ""),
+        *profile.get("skills", []),
+        *profile.get("experience", []),
+        *profile.get("projects", []),
+        *profile.get("certifications", []),
+    ])
+
+
+def match_jobs(profile: dict[str, Any], all_jobs: list[dict[str, Any]], top_n: int = 5) -> list[dict[str, Any]]:
+    query = profile_query(profile)
     results = []
     for job in all_jobs:
-        base, matched, missing = compute_structured_score(profile, job)
-        semantic = sem.get(job["id"], _semantic_fallback(profile, job))
-        edu, exp, loc = _eligibility(profile, job)
-        req_component = (len(matched) - sum(1 for s in matched if s in job.get("preferred_skills", []))) / max(len(job.get("required_skills", [])), 1) * 40
-        pref_component = (sum(1 for s in matched if s in job.get("preferred_skills", [])) / max(len(job.get("preferred_skills", [])), 1)) * 5
-        score = round(req_component + max(0, min(1, semantic)) * 25 + edu + exp + loc + pref_component)
+        o = skill_overlap(profile, job)
+        required = job.get("required_skills", [])
+        preferred = job.get("preferred_skills", [])
+        req_points = len(o["matched_required"]) / max(len(required), 1) * WEIGHTS["required_skills"]
+        pref_points = len(o["matched_preferred"]) / max(len(preferred), 1) * WEIGHTS["preferred_skills"] if preferred else WEIGHTS["preferred_skills"]
+        # TF-IDF cosine values for short texts are naturally low; 0.5+ is a strong match.
+        similarity = min(1.0, search_service.similarity(query, search_service.job_text(job)) * 2)
+        sim_points = similarity * WEIGHTS["profile_similarity"]
+        edu, exp, loc = eligibility(profile, job)
+        breakdown = {
+            "required_skills": round(req_points),
+            "profile_similarity": round(sim_points),
+            "education": edu,
+            "experience": exp,
+            "location": loc,
+            "preferred_skills": round(pref_points),
+        }
+        score = max(0, min(100, sum(breakdown.values())))
+        matched = o["matched_required"] + o["matched_preferred"]
         reasons = []
-        if matched: reasons.append("your profile includes " + ", ".join(matched[:4]))
-        if missing: reasons.append("the profile does not yet demonstrate " + ", ".join(missing[:3]))
-        explanation = f"{job.get('title')} at {job.get('company')} matches because " + ("; ".join(reasons) if reasons else "its role description is relevant to your profile").rstrip(".") + ". Scores are weighted guidance, not a hiring probability."
-        results.append({"id": job["id"], "title": job["title"], "company": job["company"], "location": job["location"], "description": job.get("description", ""), "required_skills": job.get("required_skills", []), "preferred_skills": job.get("preferred_skills", []), "match": max(0, min(100, score)), "matched": matched, "missing": missing, "explain": explanation, "source_url": job.get("source_url", ""), "updated_at": job.get("updated_at", ""), "status": job.get("status", "Curated sample — availability not verified"), "score_breakdown": {"required_skills": round(req_component), "profile_similarity": round(semantic * 25), "education": edu, "experience": exp, "location": loc, "preferred_skills": round(pref_component)}})
-    return sorted(results, key=lambda item: item["match"], reverse=True)[:top_n]
+        if matched:
+            reasons.append("your profile shows " + ", ".join(matched[:4]))
+        if o["missing_required"]:
+            reasons.append("it does not yet demonstrate " + ", ".join(o["missing_required"][:3]))
+        where = f" at {job['company']}" if job.get("company") and job.get("company") != "Sample employer" else ""
+        explanation = (
+            f"{job.get('title')}{where}: "
+            + ("; ".join(reasons) if reasons else "the role description is related to your profile")
+            + ". Scores are weighted guidance, not a hiring probability."
+        )
+        results.append({
+            "id": job["id"],
+            "title": job["title"],
+            "company": job.get("company", ""),
+            "location": job.get("location", ""),
+            "description": job.get("description", ""),
+            "required_skills": required,
+            "preferred_skills": preferred,
+            "match": score,
+            "matched": matched,
+            "missing": o["missing_required"],
+            "missing_preferred": o["missing_preferred"],
+            "explain": explanation,
+            "source_url": job.get("source_url", ""),
+            "updated_at": job.get("updated_at", ""),
+            "status": job.get("status", "Curated sample — availability not verified"),
+            "field": job.get("field", ""),
+            "source": job.get("source", "catalog"),
+            "why": job.get("why", ""),
+            "education_requirements": job.get("education_requirements", ""),
+            "experience_requirements": job.get("experience_requirements", ""),
+            "score_breakdown": breakdown,
+        })
+    results.sort(key=lambda item: (-item["match"], item["id"]))
+    return results[:top_n]
+
+
+def skill_gaps(profile: dict[str, Any], job: dict[str, Any]) -> dict[str, Any]:
+    """have = job skills already shown; missing = required gaps; improve = preferred gaps."""
+    o = skill_overlap(profile, job)
+    return {
+        "have": o["matched_required"] + o["matched_preferred"],
+        "missing": o["missing_required"],
+        "improve": o["missing_preferred"],
+        "labels": {
+            "have": "Required or preferred skills your profile already shows",
+            "missing": "Required skills not demonstrated in your profile — learn these first",
+            "improve": "Preferred (nice-to-have) skills that would strengthen your application",
+        },
+        "reasons": {s: f"{s} is a required skill for {job['title']}." for s in o["missing_required"]},
+    }

@@ -4,10 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CareerFlow AI — From Profile to Job Readiness</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Upload your resume, see matching roles, find your skill gaps, follow a 7-day learning plan and practise interviews." />
+  <meta name="theme-color" content="#6a4cff" />
+  <link rel="icon" href="assets/logo.jpeg" />
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -24,8 +28,8 @@
         <li><a href="#about">About</a></li>
       </ul>
       <div class="nav-actions">
-        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
-        <button class="btn-primary" onclick="showApp()">Get Started</button>
+        <button class="theme-toggle" type="button" data-action="toggle-theme" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
+        <button class="btn-primary" type="button" data-action="show-app">Get Started</button>
       </div>
     </nav>
 
@@ -33,12 +37,12 @@
       <div class="hero-badge">AI Career &amp; Employment Navigator</div>
       <h1>Turn your resume into a<br /><span class="grad">personalized career path.</span></h1>
       <p class="hero-sub">
-        CareerFlow AI analyzes your profile, matches you with real jobs, identifies
+        CareerFlow AI analyzes your profile, suggests roles that fit your CV in any field, identifies
         skill gaps, and builds a step-by-step plan from skills to job readiness.
       </p>
       <div class="hero-cta">
-        <button class="btn-primary lg" onclick="showApp()">Upload Your Resume</button>
-        <button class="btn-ghost lg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See How It Works</button>
+        <button class="btn-primary lg" type="button" data-action="show-app" data-page="resume">Upload Your Resume</button>
+        <button class="btn-ghost lg" type="button" data-action="scroll-to" data-target="how">See How It Works</button>
       </div>
 
       <div class="pipeline">
@@ -55,36 +59,12 @@
     <div id="features" class="features">
       <h2>Everything you need to become job-ready</h2>
       <div class="feature-grid">
-        <div class="feature-card">
-          <div class="icon">📄</div>
-          <h3>AI Resume Analyzer</h3>
-          <p>Extracts skills, education, experience, and projects into structured data automatically.</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🎯</div>
-          <h3>Explainable Job Matching</h3>
-          <p>Hybrid matching shows matched skills, missing skills, and why each role fits you.</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">📊</div>
-          <h3>Skill Gap Engine</h3>
-          <p>See exactly what's missing for your target role, prioritized by importance.</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🗺️</div>
-          <h3>Personalized Learning Plan</h3>
-          <p>Get an actionable 7-day plan tied to real target-role requirements.</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">✍️</div>
-          <h3>Resume Improvement</h3>
-          <p>Role-specific suggestions to align your resume with the jobs you want.</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🎤</div>
-          <h3>Interview Simulator</h3>
-          <p>Practice role-specific questions and get scored feedback instantly.</p>
-        </div>
+        <div class="feature-card"><div class="icon">📄</div><h3>AI Resume Analyzer</h3><p>Extracts skills, education, experience, and projects into an editable profile.</p></div>
+        <div class="feature-card"><div class="icon">🎯</div><h3>Personalized Role Matching</h3><p>Roles picked from your own CV in any field, with matched skills, missing skills and a full score breakdown. Not a fit? Regenerate or set your own.</p></div>
+        <div class="feature-card"><div class="icon">📊</div><h3>Skill Gap Engine</h3><p>See which required skills to learn first and which nice-to-haves would help.</p></div>
+        <div class="feature-card"><div class="icon">🗺️</div><h3>Personalized Learning Plan</h3><p>An actionable 7-day plan with official documentation links.</p></div>
+        <div class="feature-card"><div class="icon">✍️</div><h3>Resume Improvement</h3><p>Role-specific suggestions that never invent experience you don't have.</p></div>
+        <div class="feature-card"><div class="icon">🎤</div><h3>Interview Simulator</h3><p>Practice technical, behavioral and scenario questions with scored feedback.</p></div>
       </div>
     </div>
 
@@ -102,13 +82,14 @@
 
     <footer id="about" class="landing-footer">
       <p><b>CareerFlow AI</b> — Your next career step starts here.</p>
-      <p class="muted">Build your profile, discover opportunities, grow your skills, and practice with confidence.</p>
+      <p class="muted">Privacy: your resume is processed in memory and never stored on our server. Your profile, plan and practice history stay in your own browser.</p>
+      <p class="muted">Suggested roles are career directions, not live vacancies. Match scores and interview feedback are guidance, not hiring decisions.</p>
       <p class="footer-copy">© 2026 CareerFlow AI · Made to support your career journey.</p>
     </footer>
   </section>
 
 
-  <!-- ============ APP DASHBOARD ============ -->
+  <!-- ============ APP ============ -->
   <div id="app" class="app hidden">
     <aside class="sidebar">
       <div class="logo small">
@@ -116,17 +97,18 @@
         <span>CareerFlow <b>AI</b></span>
       </div>
 
-      <nav class="side-nav">
-        <a class="nav-item active" data-page="dashboard">📊 Dashboard</a>
-        <a class="nav-item" data-page="resume">📄 Resume</a>
-        <a class="nav-item" data-page="jobs">💼 Jobs</a>
-        <a class="nav-item" data-page="skills">🎯 Skill Gap</a>
-        <a class="nav-item" data-page="learning">🗺️ Learning</a>
-        <a class="nav-item" data-page="interview">🎤 Interview</a>
+      <nav class="side-nav" aria-label="App sections">
+        <button type="button" class="nav-item active" data-page="dashboard">📊 Dashboard</button>
+        <button type="button" class="nav-item" data-page="resume">📄 Resume</button>
+        <button type="button" class="nav-item" data-page="jobs">💼 Jobs</button>
+        <button type="button" class="nav-item" data-page="skills">🎯 Skill Gap</button>
+        <button type="button" class="nav-item" data-page="learning">🗺️ Learning</button>
+        <button type="button" class="nav-item" data-page="interview">🎤 Interview</button>
       </nav>
 
       <div class="side-footer">
-        <button class="btn-ghost sm" onclick="showLanding()">← Back to Home</button>
+        <button type="button" class="btn-ghost sm" data-action="show-landing">← Back to Home</button>
+        <button type="button" class="btn-ghost sm danger" data-action="reset-data">Clear my data</button>
       </div>
     </aside>
 
@@ -134,16 +116,17 @@
       <header class="topbar">
         <h2 id="page-title">Dashboard</h2>
         <div class="topbar-right">
-          <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
-          <div class="readiness-badge">
+          <button class="theme-toggle" type="button" data-action="toggle-theme" aria-label="Switch to dark theme"><span aria-hidden="true">🌙</span><span data-theme-label>Dark mode</span></button>
+          <div class="readiness-badge" title="Average of the four readiness measures on the dashboard">
             <span>Readiness</span>
             <b id="readiness-score">0%</b>
           </div>
-          <div class="avatar">U</div>
+          <div class="avatar" id="avatar" aria-hidden="true">U</div>
         </div>
       </header>
 
       <div class="content">
+        <div id="service-banner" class="notice hidden" role="status"></div>
 
         <!-- -------- DASHBOARD -------- -->
         <section id="page-dashboard" class="page active">
@@ -156,19 +139,20 @@
 
           <div class="panel">
             <h3>Career Readiness Breakdown</h3>
-            <div class="progress-row"><span>Skill Relevance</span><div class="bar"><div class="fill" style="width:0%" id="bar-skills"></div></div><b id="val-skills">—</b></div>
-            <div class="progress-row"><span>Project Strength</span><div class="bar"><div class="fill" style="width:0%" id="bar-projects"></div></div><b id="val-projects">—</b></div>
-            <div class="progress-row"><span>Clarity</span><div class="bar"><div class="fill" style="width:0%" id="bar-clarity"></div></div><b id="val-clarity">—</b></div>
-            <div class="progress-row"><span>Role Alignment</span><div class="bar"><div class="fill" style="width:0%" id="bar-role"></div></div><b id="val-role">—</b></div>
+            <div class="progress-row"><span>Skill Relevance</span><div class="bar"><div class="fill" id="bar-skills"></div></div><b id="val-skills">—</b></div>
+            <div class="progress-row"><span>Project Strength</span><div class="bar"><div class="fill" id="bar-projects"></div></div><b id="val-projects">—</b></div>
+            <div class="progress-row"><span>Profile Clarity</span><div class="bar"><div class="fill" id="bar-clarity"></div></div><b id="val-clarity">—</b></div>
+            <div class="progress-row"><span>Role Alignment</span><div class="bar"><div class="fill" id="bar-role"></div></div><b id="val-role">—</b></div>
+            <p class="muted small-note" id="readiness-note">Upload your resume to see your readiness.</p>
           </div>
 
           <div class="panel">
             <h3>Quick Actions</h3>
             <div class="quick-actions">
-              <button class="qa" onclick="navigate('resume')">📄 Upload Resume</button>
-              <button class="qa" onclick="navigate('jobs')">💼 Explore Jobs</button>
-              <button class="qa" onclick="navigate('learning')">🗺️ Generate Plan</button>
-              <button class="qa" onclick="navigate('interview')">🎤 Practice Interview</button>
+              <button type="button" class="qa" data-page="resume">📄 Upload Resume</button>
+              <button type="button" class="qa" data-page="jobs">💼 Explore Roles</button>
+              <button type="button" class="qa" data-page="learning">🗺️ Generate Plan</button>
+              <button type="button" class="qa" data-page="interview">🎤 Practice Interview</button>
             </div>
           </div>
         </section>
@@ -177,90 +161,123 @@
         <section id="page-resume" class="page">
           <div class="panel">
             <h3>Upload Resume</h3>
-            <p class="muted">PDF only · Max 5MB · Your data stays private.</p>
-            <div id="dropzone" class="dropzone">
-              <input type="file" id="fileInput" accept="application/pdf" hidden />
+            <p class="muted">PDF only · Max 5 MB · Processed in memory and not stored on the server.</p>
+            <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload a PDF resume">
+              <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
               <div class="dz-icon">⬆️</div>
               <p><b>Drag &amp; drop</b> your PDF here or <span class="link">browse</span></p>
             </div>
-            <div id="uploadStatus" class="upload-status hidden"></div>
+            <div id="uploadStatus" class="upload-status hidden" role="status" aria-live="polite"></div>
+            <p class="muted small-note">No resume handy? <button type="button" class="link-btn" data-action="manual-profile">Enter your profile manually</button>.</p>
           </div>
 
           <div id="profileResult" class="panel hidden">
-            <h3>Extracted Profile</h3>
-            <div class="profile-block">
-              <h4>Skills</h4>
-              <div id="p-skills" class="chips"></div>
-            </div>
-            <div class="profile-block">
-              <h4>Experience</h4>
-              <ul id="p-exp" class="clean-list"></ul>
-            </div>
-            <div class="profile-block">
-              <h4>Education</h4>
-              <ul id="p-edu" class="clean-list"></ul>
-            </div>
-            <div class="profile-block">
-              <h4>Projects</h4>
-              <ul id="p-proj" class="clean-list"></ul>
-            </div>
-            <details class="profile-edit"><summary>Edit profile details</summary>
-              <label>Name<input id="edit-name" type="text" maxlength="120" /></label>
-              <label>Skills (comma separated)<textarea id="edit-skills" rows="3"></textarea></label>
-              <label>Experience (one entry per line)<textarea id="edit-experience" rows="3"></textarea></label>
-              <label>Education (one entry per line)<textarea id="edit-education" rows="2"></textarea></label>
-              <label>Projects (one per line)<textarea id="edit-projects" rows="3"></textarea></label>
-              <label>Certifications (one per line)<textarea id="edit-certifications" rows="2"></textarea></label>
-              <label>Location<input id="edit-location" type="text" maxlength="160" /></label>
-              <label>Career level<select id="edit-level"><option>Entry</option><option>Mid</option><option>Senior</option></select></label>
-              <button type="button" class="btn-primary" onclick="saveEditedProfile()">Save profile</button>
-              <span id="profileSaveStatus" class="muted" aria-live="polite"></span>
+            <h3>Your Profile</h3>
+            <p class="muted" id="p-name"></p>
+            <p class="muted" id="p-location"></p>
+            <div class="profile-block"><h4>Skills</h4><div id="p-skills" class="chips"></div></div>
+            <div class="profile-block"><h4>Experience</h4><ul id="p-exp" class="clean-list"></ul></div>
+            <div class="profile-block"><h4>Education</h4><ul id="p-edu" class="clean-list"></ul></div>
+            <div class="profile-block"><h4>Projects</h4><ul id="p-proj" class="clean-list"></ul></div>
+            <div class="profile-block"><h4>Certifications</h4><ul id="p-certs" class="clean-list"></ul></div>
+
+            <details class="profile-edit" id="profileEdit"><summary>Edit profile details</summary>
+              <form id="profileForm">
+                <label>Name<input id="edit-name" type="text" maxlength="120" autocomplete="name" /></label>
+                <label>Skills (comma separated)<textarea id="edit-skills" rows="3"></textarea></label>
+                <label>Experience (one entry per line)<textarea id="edit-experience" rows="3"></textarea></label>
+                <label>Education (one entry per line)<textarea id="edit-education" rows="2"></textarea></label>
+                <label>Projects (one per line)<textarea id="edit-projects" rows="3"></textarea></label>
+                <label>Certifications (one per line)<textarea id="edit-certifications" rows="2"></textarea></label>
+                <label>Location<input id="edit-location" type="text" maxlength="160" placeholder="e.g. Lahore, Pakistan" /></label>
+                <label>Career level<select id="edit-level"><option>Entry</option><option>Mid</option><option>Senior</option></select></label>
+                <button type="submit" class="btn-primary">Save profile</button>
+                <span id="profileSaveStatus" class="muted" aria-live="polite"></span>
+              </form>
             </details>
-            <button class="btn-ghost" onclick="improveResume()">Get role-specific resume suggestions</button>
+
+            <div class="row-actions">
+              <button type="button" class="btn-ghost" data-action="improve-resume">Get role-specific resume suggestions</button>
+              <button type="button" class="btn-primary" data-page="jobs">Continue → Explore Jobs</button>
+            </div>
             <div id="improveOutput" class="suggestion-list"></div>
-            <button class="btn-primary" onclick="navigate('jobs')">Continue → Explore Jobs</button>
           </div>
         </section>
 
         <!-- -------- JOBS -------- -->
         <section id="page-jobs" class="page">
           <div class="panel">
-            <h3>Recommended Jobs</h3>
-            <p class="muted">Ranked with transparent skills, profile-similarity, eligibility, and location weights. Curated sample roles; current vacancies are not verified.</p>
-            <label class="job-search-label">Filter recommended roles<input id="jobSearch" type="search" placeholder="Search title, company, or skill" /></label>
+            <div class="panel-head">
+              <div>
+                <h3>Recommended Roles</h3>
+                <p class="muted">Suggested from your CV and profile, in whatever field fits you. Not relevant? Get different suggestions or set your own target role.</p>
+              </div>
+              <button type="button" class="btn-ghost" data-action="regenerate-jobs" id="regenJobsBtn">↻ Suggest different roles</button>
+            </div>
+
+            <div class="job-controls">
+              <form id="preferenceForm" class="inline-form">
+                <label for="jobPreference">What kind of work do you want? <span class="muted">(optional)</span></label>
+                <div class="inline-row">
+                  <input id="jobPreference" type="text" maxlength="200" placeholder="e.g. marketing, finance, remote, teaching" />
+                  <button type="submit" class="btn-ghost">Update suggestions</button>
+                </div>
+              </form>
+              <form id="customRoleForm" class="inline-form">
+                <label for="customRole">Already know the role you want?</label>
+                <div class="inline-row">
+                  <input id="customRole" type="text" maxlength="120" placeholder="e.g. Digital Marketing Executive" />
+                  <button type="submit" class="btn-primary" id="customRoleBtn">Set as my target</button>
+                </div>
+              </form>
+            </div>
+
+            <div id="jobsNotice" class="notice hidden" role="status"></div>
+            <label class="job-search-label">Filter these roles<input id="jobSearch" type="search" placeholder="Search title, field, or skill" /></label>
             <div id="jobList" class="job-list"></div>
+            <p class="muted small-note">These are career directions that fit your CV, not live vacancies — search job boards for current openings. Match score: required skills 40, profile similarity 25, education 10, experience 10, location 10, preferred skills 5.</p>
           </div>
         </section>
 
         <!-- -------- SKILL GAP -------- -->
         <section id="page-skills" class="page">
           <div class="panel">
+            <div class="target-bar"></div>
             <h3>Skill Gap Analysis</h3>
-            <p class="muted">Target role: <b id="target-role-label">—</b></p>
-            <p class="muted">Skills marked as priority gaps are requirements not demonstrated in the profile you provided.</p>
+            <p class="muted">Compared against: <b id="target-role-label">—</b></p>
             <div class="gap-grid">
               <div class="gap-col">
                 <h4 class="ok">✓ Already Have</h4>
+                <p class="muted small-note">Job skills your profile shows</p>
                 <div id="gap-have" class="chips"></div>
               </div>
               <div class="gap-col">
-                <h4 class="warn">◐ Improve</h4>
-                <div id="gap-improve" class="chips"></div>
-              </div>
-              <div class="gap-col">
                 <h4 class="bad">✗ Priority Missing</h4>
+                <p class="muted small-note">Required skills to learn first</p>
                 <div id="gap-missing" class="chips"></div>
               </div>
+              <div class="gap-col">
+                <h4 class="warn">◐ Nice to Add</h4>
+                <p class="muted small-note">Preferred skills that would strengthen you</p>
+                <div id="gap-improve" class="chips"></div>
+              </div>
             </div>
-            <button class="btn-primary" onclick="navigate('learning')">Generate Learning Plan →</button>
+            <button type="button" class="btn-primary" data-page="learning">Generate Learning Plan →</button>
           </div>
         </section>
 
         <!-- -------- LEARNING -------- -->
         <section id="page-learning" class="page">
           <div class="panel">
-            <h3>Your 7-Day Learning Plan</h3>
-            <p class="muted">Tasks tied directly to your skill gaps.</p>
+            <div class="target-bar"></div>
+            <div class="panel-head">
+              <div>
+                <h3>Your 7-Day Learning Plan</h3>
+                <p class="muted" id="plan-subtitle">Tasks tied directly to your skill gaps.</p>
+              </div>
+              <button type="button" class="btn-ghost" data-action="regenerate-plan" id="regenPlanBtn">↻ Regenerate</button>
+            </div>
+            <div id="planNotice" class="notice hidden"></div>
             <div id="planList" class="plan-list"></div>
           </div>
         </section>
@@ -268,21 +285,26 @@
         <!-- -------- INTERVIEW -------- -->
         <section id="page-interview" class="page">
           <div class="panel">
+            <div class="target-bar"></div>
             <h3>Interview Simulator</h3>
-            <p class="muted">Role-specific questions generated from the job context.</p>
+            <p class="muted">Questions are tailored to your target role and rotate between technical, behavioral and scenario types.</p>
             <div class="interview-box">
               <div class="q-block">
-                <span class="q-label">Question</span>
+                <span class="q-label" id="q-label">Question</span>
                 <p id="interview-q">Click "Start Interview" to begin.</p>
               </div>
-              <textarea id="interview-answer" placeholder="Type your answer here..."></textarea>
+              <label for="interview-answer" class="visually-hidden">Your answer</label>
+              <textarea id="interview-answer" placeholder="Type your answer here..." maxlength="12000"></textarea>
               <div class="interview-actions">
-                <button class="btn-primary" onclick="startInterview()">Start Interview</button>
-                <button class="btn-ghost" onclick="submitAnswer()">Submit Answer</button>
+                <button type="button" class="btn-primary" data-action="start-interview" id="startInterviewBtn">Start Interview</button>
+                <button type="button" class="btn-ghost" data-action="submit-answer" id="submitAnswerBtn">Submit Answer</button>
               </div>
             </div>
-            <div id="interview-feedback" class="feedback hidden"></div>
-            <div class="panel interview-history"><h4>Recent practice</h4><div id="interview-history-list" class="muted">No interview sessions yet.</div></div>
+            <div id="interview-feedback" class="feedback hidden" aria-live="polite"></div>
+            <div class="panel interview-history">
+              <div class="panel-head"><h4>Recent practice</h4><button type="button" class="link-btn" data-action="clear-history">Clear history</button></div>
+              <div id="interview-history-list" class="muted">No interview sessions yet.</div>
+            </div>
             <p class="muted">Interview feedback is practice guidance, not an official hiring assessment.</p>
           </div>
         </section>
@@ -291,6 +313,7 @@
     </main>
   </div>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

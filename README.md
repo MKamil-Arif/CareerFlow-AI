@@ -1,64 +1,118 @@
 # CareerFlow AI
 
-From Profile to Job Readiness. A local single-user career planning MVP built with vanilla HTML/CSS/JavaScript, FastAPI, SQLite/SQLAlchemy, ChromaDB, and Groq/Gemini.
+**From profile to job readiness.** Upload a PDF resume and CareerFlow AI builds an editable profile, suggests roles that fit *your* CV in any field (regenerate them, steer them with a preference, or type your own target role) with a transparent score, shows your skill gaps, creates a 7-day learning plan with official documentation links, suggests resume improvements, and lets you practise interview questions with scored feedback.
 
-## Features
+- **Frontend:** plain HTML, CSS and JavaScript (no build step)
+- **Backend:** FastAPI (Python 3.10+), stateless
+- **AI:** Groq first, Gemini as backup. Optional: with no keys every feature still works using offline rules.
+- **No database.** Curated data is read from JSON files. Your profile, plans, progress and interview history stay in **your browser** (localStorage). Uploaded resumes are processed in memory and never saved.
 
-- PDF resume validation, selectable-text extraction, structured profile analysis, and editable profile details.
-- Conservative explicit-skill extraction if AI providers fail; extracted data remains reviewable.
-- Curated sample job browsing and search, weighted 0–100 match scores, matched/missing skills, score breakdowns, and grounded explanations.
-- Skill gaps, a seven-day learning plan with official documentation links, saved plans, and persisted completion checkboxes.
-- Resume suggestions, text interview practice with a scoring rubric, and saved interview history.
-- SQLite storage for the local profile, curated jobs, match records, learning plans, and interview sessions.
-- Chroma collections for jobs, skills, careers, interviews, and learning. The default local hashing-vector baseline runs offline. Set CAREERFLOW_EMBEDDING_MODEL to a directory containing a local Sentence Transformers model to use dense embeddings; if Chroma itself is unavailable, curated jobs remain usable through lexical matching.
+> Jobs are curated examples, not live vacancies. Match scores and interview feedback are guidance, not hiring decisions.
 
-Included jobs are curated examples, not live vacancies. Availability is not verified. Match scores are guidance, not hiring probabilities. Interview feedback is for practice, not an employer assessment.
+## Run locally (Windows CMD or VS Code terminal)
 
-## Run on Windows PowerShell
+**Easiest:** double-click `run.bat`. It sets up `.venv`, installs packages, checks your AI keys, starts the server and opens your browser.
 
-From the repository root:
+Or run the steps yourself:
 
-    py -m venv .venv
-    .\.venv\Scripts\Activate.ps1
-    python -m pip install --upgrade pip
-    pip install -r backend\app\requirements.txt
+```bat
+py -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+copy .env.example .env
+.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --reload
+```
 
-Add provider keys to backend/app/.env. Use the blank backend/app/.env.example only if .env does not already exist. Groq is tried first and Gemini is the secondary provider. Keep .env private and never put keys in frontend files. Without provider access, curated jobs, matching, learning plans, and heuristic interview practice remain available.
+Open http://127.0.0.1:8000 — API docs at `/docs`, health at `/api/health`.
 
-Run from the repository root:
+macOS / Linux: the same commands with `python3 -m venv .venv` and `.venv/bin/python`.
 
-    uvicorn app.main:app --app-dir backend --reload
+### Turn on AI features
 
-Open http://127.0.0.1:8000/. API docs are at http://127.0.0.1:8000/docs and health is at http://127.0.0.1:8000/api/health. Chroma indexing runs locally at startup and does not need to download a model. For dense embeddings, install backend/app/requirements-embeddings.txt, download a Sentence Transformers model separately, and set CAREERFLOW_EMBEDDING_MODEL to its local directory. Vector indexing failures are logged and do not block the API.
+Put at least one key in `.env` (repository root), then check that it works:
 
-FastAPI serves the frontend and API from one origin. If you serve frontend/ separately, set window.CAREERFLOW_API_BASE before script.js to the backend URL.
+```bat
+cd backend
+..\.venv\Scripts\python.exe -m app.check_ai
+```
 
-## Data and privacy
+It prints `[ ok ]` or `[FAIL]` with the real error for each provider (bad key, wrong model name, blocked network). The server log also records every provider failure.
 
-SQLite is stored at backend/app/data/careerflow.db and Chroma at backend/app/data/chroma/. Both are ignored by Git. This MVP has no accounts or authentication and is intended for one local user. It stores the parsed profile and interview text for the workflow, but does not retain the uploaded PDF. Delete the local database and Chroma folder to remove local records.
+## Deploy (free)
 
-## API highlights
+The repo is ready for free hosting with the included `Dockerfile`:
 
-- POST /api/resume/analyze (also /api/resume/upload)
-- GET/PUT /api/profile
-- GET /api/jobs, GET /api/jobs/{id}, POST /api/jobs/match
-- GET/POST /api/skills/gap
-- GET/POST /api/learning-plan, PUT /api/learning-plan/{plan_id}/progress
-- POST /api/resume/improve
-- POST /api/interview/start, POST /api/interview/evaluate, GET /api/interview/history
+| Platform | Free tier | How |
+|---|---|---|
+| **Render** (recommended) | 512 MB RAM, sleeps after 15 min idle, ~1 min wake-up | `render.yaml` blueprint |
+| **Hugging Face Spaces** | Docker Space on free CPU hardware | Same Dockerfile |
+
+Step-by-step instructions: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Tests
 
-    pip install -r backend\app\requirements-dev.txt
-    python -m pytest backend\app\tests -q
+```bat
+.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+cd backend
+..\.venv\Scripts\python.exe -m pytest
+```
 
-Focused tests cover skill matching and score transparency. Manual journey: upload a selectable-text PDF under 5 MB, review and edit the profile, search and choose a role, inspect skill gaps, generate/check off a learning plan, request resume suggestions, practice an interview, then refresh the interview history.
+GitHub Actions (`.github/workflows/ci.yml`) runs the tests and a Docker build on every push.
 
 ## Project layout
 
-- frontend/ — responsive single-page workflow.
-- backend/app/main.py — API routes and startup orchestration.
-- backend/app/models.py and database.py — SQLAlchemy models and SQLite persistence.
-- backend/app/services/ — PDF extraction, AI workflows, matching, and Chroma retrieval.
-- backend/app/data/ — curated jobs, skills, careers, interviews, and learning records.
-- backend/app/tests/ — business logic tests.
+```
+careerflow-ai/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # app factory, middleware, serves the frontend
+│   │   ├── config.py            # all settings from environment variables
+│   │   ├── schemas.py           # validated, size-limited request bodies
+│   │   ├── check_ai.py          # `python -m app.check_ai` provider diagnostics
+│   │   ├── api/routes.py        # REST endpoints (stateless)
+│   │   ├── core/security.py     # rate limiting + security headers
+│   │   ├── services/
+│   │   │   ├── ai_service.py        # Groq/Gemini calls + prompts (logged failures)
+│   │   │   ├── career_service.py    # offline parser, plans, questions, scoring
+│   │   │   ├── matching_service.py  # weighted 0–100 match + skill gaps
+│   │   │   ├── search_service.py    # in-memory TF-IDF search (replaces ChromaDB)
+│   │   │   ├── skills.py            # skill aliases (ReactJS = React, …)
+│   │   │   ├── knowledge.py         # loads the curated JSON data
+│   │   │   └── pdf_service.py       # PDF text extraction
+│   │   └── data/                # jobs, skills, careers, interviews, learning resources
+│   ├── tests/
+│   ├── requirements.txt
+│   └── requirements-dev.txt
+├── frontend/                    # index.html, script.js, style.css, config.js, theme.js
+├── docs/DEPLOYMENT.md
+├── Dockerfile · .dockerignore · render.yaml
+└── .env.example
+```
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/health` | Status, AI configuration, search index size |
+| POST | `/api/resume/analyze` | PDF upload → profile (`mode`: `ai` or `offline`) |
+| POST | `/api/resume/improve` | Resume suggestions for a target job |
+| GET | `/api/jobs`, `/api/jobs/{id}` | Curated roles (`?q=` and `?location=` filters) |
+| POST | `/api/jobs/recommend` | Roles suggested from the CV (any field). `exclude` = titles already shown (for regenerate), `preference` = e.g. "remote finance" |
+| POST | `/api/jobs/custom` | Build a target role from a typed title, scored against the profile |
+| POST | `/api/jobs/match` | Score the curated catalog against a profile |
+| POST | `/api/skills/gap` | `have` / `missing` (required) / `improve` (preferred) |
+| POST | `/api/learning-plan` | 7-day plan with official resources |
+| POST | `/api/interview/start` | Next question (technical → behavioral → scenario) |
+| POST | `/api/interview/evaluate` | Scores 0–10 for correctness, completeness, clarity |
+
+Requests that need a profile send it in the body. Skill gap, learning plan, resume tips and interview requests take the target role as `"job": {...}` (the full role object the browser received), or `"job_id"` for a catalog role, so Skill Gap → Learning → Interview always follow the role the user selected — without the server storing anything.
+
+## Customising the data
+
+Edit the JSON files in `backend/app/data/`. `jobs.json` is the offline role catalog (33 roles across marketing, finance, HR, sales, design, engineering, healthcare, education, admin and IT) used when AI is unavailable. Add a role to `jobs.json` (unique numeric `id`), and add a matching official resource to `learning.json` so learning plans link to it. Restart the server to reload.
+
+## Privacy
+
+- No accounts, no database, no server-side storage of resumes or profiles.
+- Profile text is sent to the configured AI provider (Groq or Gemini) for analysis when keys are set.
+- "Clear my data" in the app sidebar removes everything stored in the browser.

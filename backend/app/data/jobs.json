@@ -21,7 +21,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Software & IT"
   },
   {
     "id": 2,
@@ -44,7 +45,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Software & IT"
   },
   {
     "id": 3,
@@ -66,7 +68,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Data & Analytics"
   },
   {
     "id": 4,
@@ -89,7 +92,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Software & IT"
   },
   {
     "id": 5,
@@ -112,7 +116,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Software & IT"
   },
   {
     "id": 6,
@@ -134,7 +139,8 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
-    "status": "Curated sample — availability not verified"
+    "status": "Curated sample — availability not verified",
+    "field": "Software & IT"
   },
   {
     "id": 7,
@@ -156,6 +162,655 @@
     "employment_type": "Curated example",
     "source_url": "",
     "updated_at": "2026-10-02",
+    "status": "Curated sample — availability not verified",
+    "field": "Data & Analytics"
+  },
+  {
+    "id": 8,
+    "title": "Digital Marketing Executive",
+    "field": "Marketing",
+    "company": "Sample employer",
+    "location": "Lahore (Hybrid)",
+    "required_skills": [
+      "SEO",
+      "Social Media Marketing",
+      "Google Analytics",
+      "Content Writing",
+      "Canva"
+    ],
+    "preferred_skills": [
+      "Google Ads",
+      "Email Marketing"
+    ],
+    "description": "Plan and run online campaigns, track results and grow brand reach.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 9,
+    "title": "Content Writer",
+    "field": "Marketing & Media",
+    "company": "Sample employer",
+    "location": "Remote",
+    "required_skills": [
+      "Content Writing",
+      "SEO",
+      "Research",
+      "Proofreading",
+      "WordPress"
+    ],
+    "preferred_skills": [
+      "Copywriting",
+      "Social Media Marketing"
+    ],
+    "description": "Write blogs, web copy and social posts that are accurate and on-brand.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 10,
+    "title": "Social Media Manager",
+    "field": "Marketing",
+    "company": "Sample employer",
+    "location": "Karachi (Hybrid)",
+    "required_skills": [
+      "Social Media Marketing",
+      "Content Creation",
+      "Canva",
+      "Copywriting",
+      "Analytics"
+    ],
+    "preferred_skills": [
+      "Meta Ads",
+      "Video Editing"
+    ],
+    "description": "Own social channels, plan content calendars and report on engagement.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "1+ years experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 11,
+    "title": "Graphic Designer",
+    "field": "Design",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "Adobe Photoshop",
+      "Adobe Illustrator",
+      "Typography",
+      "Branding",
+      "Canva"
+    ],
+    "preferred_skills": [
+      "Figma",
+      "Motion Graphics"
+    ],
+    "description": "Create visual assets for print, social media and brand campaigns.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 12,
+    "title": "UI/UX Designer",
+    "field": "Design",
+    "company": "Sample employer",
+    "location": "Remote",
+    "required_skills": [
+      "Figma",
+      "Wireframing",
+      "Prototyping",
+      "User Research",
+      "Design Systems"
+    ],
+    "preferred_skills": [
+      "HTML",
+      "CSS"
+    ],
+    "description": "Design usable interfaces, run user research and hand off clear specs.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 13,
+    "title": "Video Editor",
+    "field": "Design & Media",
+    "company": "Sample employer",
+    "location": "Islamabad (Hybrid)",
+    "required_skills": [
+      "Adobe Premiere Pro",
+      "Video Editing",
+      "Storytelling",
+      "After Effects"
+    ],
+    "preferred_skills": [
+      "DaVinci Resolve",
+      "Motion Graphics"
+    ],
+    "description": "Edit short- and long-form video for brands and social platforms.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 14,
+    "title": "Junior Accountant",
+    "field": "Finance & Accounting",
+    "company": "Sample employer",
+    "location": "Karachi",
+    "required_skills": [
+      "Accounting",
+      "Bookkeeping",
+      "Excel",
+      "Financial Reporting",
+      "QuickBooks"
+    ],
+    "preferred_skills": [
+      "Taxation",
+      "SAP"
+    ],
+    "description": "Record transactions, reconcile accounts and prepare monthly reports.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 15,
+    "title": "Financial Analyst",
+    "field": "Finance & Accounting",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "Financial Modeling",
+      "Excel",
+      "Financial Reporting",
+      "Budgeting",
+      "Data Analysis"
+    ],
+    "preferred_skills": [
+      "Power BI",
+      "SQL"
+    ],
+    "description": "Build forecasts and budgets and explain the numbers to managers.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "1+ years experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 16,
+    "title": "Bank Operations Officer",
+    "field": "Banking",
+    "company": "Sample employer",
+    "location": "Islamabad",
+    "required_skills": [
+      "Banking Operations",
+      "Customer Service",
+      "Compliance",
+      "Excel",
+      "Communication"
+    ],
+    "preferred_skills": [
+      "AML/KYC",
+      "Teller Operations"
+    ],
+    "description": "Handle branch operations, account services and compliance checks.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 17,
+    "title": "HR Officer",
+    "field": "Human Resources",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "Recruitment",
+      "Onboarding",
+      "HR Policies",
+      "Communication",
+      "MS Office"
+    ],
+    "preferred_skills": [
+      "Payroll",
+      "Labour Law"
+    ],
+    "description": "Run hiring, onboarding and day-to-day employee relations.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 18,
+    "title": "Sales Executive",
+    "field": "Sales",
+    "company": "Sample employer",
+    "location": "Karachi",
+    "required_skills": [
+      "Sales",
+      "Negotiation",
+      "CRM",
+      "Communication",
+      "Lead Generation"
+    ],
+    "preferred_skills": [
+      "Salesforce",
+      "Excel"
+    ],
+    "description": "Find and close new customers and maintain long-term accounts.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 19,
+    "title": "Business Development Officer",
+    "field": "Sales & Business",
+    "company": "Sample employer",
+    "location": "Lahore (Hybrid)",
+    "required_skills": [
+      "Business Development",
+      "Market Research",
+      "Negotiation",
+      "Communication",
+      "Presentation Skills"
+    ],
+    "preferred_skills": [
+      "CRM",
+      "Excel"
+    ],
+    "description": "Identify partnerships and new markets and pitch to clients.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "1+ years experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 20,
+    "title": "Customer Support Representative",
+    "field": "Customer Service",
+    "company": "Sample employer",
+    "location": "Remote",
+    "required_skills": [
+      "Customer Service",
+      "Communication",
+      "CRM",
+      "Problem Solving",
+      "Typing"
+    ],
+    "preferred_skills": [
+      "Zendesk",
+      "Live Chat Support"
+    ],
+    "description": "Resolve customer questions by chat, email and phone with empathy.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 21,
+    "title": "Project Coordinator",
+    "field": "Project Management",
+    "company": "Sample employer",
+    "location": "Islamabad",
+    "required_skills": [
+      "Project Management",
+      "Scheduling",
+      "Communication",
+      "MS Office",
+      "Documentation"
+    ],
+    "preferred_skills": [
+      "Jira",
+      "Agile"
+    ],
+    "description": "Track timelines, coordinate teams and keep stakeholders updated.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 22,
+    "title": "Administrative Assistant",
+    "field": "Administration",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "MS Office",
+      "Scheduling",
+      "Documentation",
+      "Communication",
+      "Data Entry"
+    ],
+    "preferred_skills": [
+      "Excel",
+      "Bookkeeping"
+    ],
+    "description": "Support office operations, records, meetings and correspondence.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 23,
+    "title": "Data Entry Operator",
+    "field": "Administration",
+    "company": "Sample employer",
+    "location": "Remote",
+    "required_skills": [
+      "Data Entry",
+      "Typing",
+      "Excel",
+      "Attention to Detail",
+      "MS Office"
+    ],
+    "preferred_skills": [
+      "Google Sheets"
+    ],
+    "description": "Enter and verify records accurately in spreadsheets and systems.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 24,
+    "title": "Supply Chain Officer",
+    "field": "Supply Chain & Procurement",
+    "company": "Sample employer",
+    "location": "Karachi",
+    "required_skills": [
+      "Procurement",
+      "Inventory Management",
+      "Vendor Management",
+      "Excel",
+      "Negotiation"
+    ],
+    "preferred_skills": [
+      "SAP",
+      "Logistics"
+    ],
+    "description": "Manage purchasing, stock levels and supplier relationships.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 25,
+    "title": "School Teacher",
+    "field": "Education",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "Teaching",
+      "Lesson Planning",
+      "Classroom Management",
+      "Communication",
+      "Subject Knowledge"
+    ],
+    "preferred_skills": [
+      "Google Classroom",
+      "Assessment Design"
+    ],
+    "description": "Plan and deliver lessons and track student progress.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 26,
+    "title": "Healthcare Administrator",
+    "field": "Healthcare",
+    "company": "Sample employer",
+    "location": "Islamabad",
+    "required_skills": [
+      "Patient Records",
+      "Medical Terminology",
+      "MS Office",
+      "Communication",
+      "Scheduling"
+    ],
+    "preferred_skills": [
+      "EMR Systems",
+      "Billing"
+    ],
+    "description": "Coordinate appointments, records and front-desk operations at a clinic.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 27,
+    "title": "Staff Nurse",
+    "field": "Healthcare",
+    "company": "Sample employer",
+    "location": "Rawalpindi",
+    "required_skills": [
+      "Patient Care",
+      "Clinical Skills",
+      "Medication Administration",
+      "Documentation",
+      "Communication"
+    ],
+    "preferred_skills": [
+      "BLS Certification",
+      "ICU Experience"
+    ],
+    "description": "Provide patient care and maintain accurate clinical records. Requires a recognised nursing qualification and registration.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "1+ years experience or equivalent project work",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 28,
+    "title": "Civil Site Engineer",
+    "field": "Engineering",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "AutoCAD",
+      "Site Supervision",
+      "Quantity Surveying",
+      "Construction Management",
+      "Structural Analysis"
+    ],
+    "preferred_skills": [
+      "Primavera P6",
+      "ETABS"
+    ],
+    "description": "Supervise construction work, quantities and quality on site.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 29,
+    "title": "Junior Mechanical Engineer",
+    "field": "Engineering",
+    "company": "Sample employer",
+    "location": "Faisalabad",
+    "required_skills": [
+      "AutoCAD",
+      "SolidWorks",
+      "Mechanical Design",
+      "Maintenance",
+      "Problem Solving"
+    ],
+    "preferred_skills": [
+      "ANSYS",
+      "Lean Manufacturing"
+    ],
+    "description": "Design parts and support maintenance and production improvements.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 30,
+    "title": "Junior Electrical Engineer",
+    "field": "Engineering",
+    "company": "Sample employer",
+    "location": "Karachi",
+    "required_skills": [
+      "Electrical Design",
+      "AutoCAD",
+      "PLC",
+      "Power Systems",
+      "Troubleshooting"
+    ],
+    "preferred_skills": [
+      "MATLAB",
+      "SCADA"
+    ],
+    "description": "Design and maintain electrical systems and control panels.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 31,
+    "title": "Flutter Mobile Developer",
+    "field": "Software & IT",
+    "company": "Sample employer",
+    "location": "Remote",
+    "required_skills": [
+      "Flutter",
+      "Dart",
+      "Git",
+      "REST APIs",
+      "Firebase"
+    ],
+    "preferred_skills": [
+      "Kotlin",
+      "Swift"
+    ],
+    "description": "Build cross-platform mobile apps and publish them to app stores.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 32,
+    "title": "QA Engineer",
+    "field": "Software & IT",
+    "company": "Sample employer",
+    "location": "Lahore",
+    "required_skills": [
+      "Manual Testing",
+      "Test Cases",
+      "Bug Tracking",
+      "Jira",
+      "SQL"
+    ],
+    "preferred_skills": [
+      "Selenium",
+      "Automation Testing"
+    ],
+    "description": "Test software, write test cases and report defects clearly.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
+    "status": "Curated sample — availability not verified"
+  },
+  {
+    "id": 33,
+    "title": "Junior Cybersecurity Analyst",
+    "field": "Software & IT",
+    "company": "Sample employer",
+    "location": "Islamabad",
+    "required_skills": [
+      "Networking",
+      "Linux",
+      "Security Fundamentals",
+      "SIEM",
+      "Incident Response"
+    ],
+    "preferred_skills": [
+      "Python",
+      "CompTIA Security+"
+    ],
+    "description": "Monitor alerts, investigate incidents and harden systems.",
+    "education_requirements": "Relevant degree or equivalent practical experience",
+    "experience_requirements": "Entry level; projects or internships accepted",
+    "employment_type": "Curated example",
+    "source_url": "",
+    "updated_at": "2026-10-03",
     "status": "Curated sample — availability not verified"
   }
 ]

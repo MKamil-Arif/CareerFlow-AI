@@ -1,7 +1,7 @@
 [
   {
     "id": "python_tutorial",
-    "title": "Python Tutorial",
+    "title": "The Python Tutorial",
     "skill": "Python",
     "source_url": "https://docs.python.org/3/tutorial/",
     "source": "Official Python documentation"
@@ -14,6 +14,13 @@
     "source": "MDN"
   },
   {
+    "id": "ts_handbook",
+    "title": "TypeScript Handbook",
+    "skill": "TypeScript",
+    "source_url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+    "source": "Official TypeScript documentation"
+  },
+  {
     "id": "react_learn",
     "title": "Learn React",
     "skill": "React",
@@ -21,11 +28,25 @@
     "source": "Official React documentation"
   },
   {
-    "id": "sql_lite",
-    "title": "SQL Language",
-    "skill": "SQL",
-    "source_url": "https://www.sqlite.org/lang.html",
-    "source": "SQLite documentation"
+    "id": "nextjs_learn",
+    "title": "Learn Next.js",
+    "skill": "Next.js",
+    "source_url": "https://nextjs.org/learn",
+    "source": "Official Next.js course"
+  },
+  {
+    "id": "redux_essentials",
+    "title": "Redux Essentials",
+    "skill": "Redux",
+    "source_url": "https://redux.js.org/tutorials/essentials/part-1-overview-concepts",
+    "source": "Official Redux documentation"
+  },
+  {
+    "id": "jest_start",
+    "title": "Getting Started with Jest",
+    "skill": "Jest",
+    "source_url": "https://jestjs.io/docs/getting-started",
+    "source": "Official Jest documentation"
   },
   {
     "id": "html",
@@ -40,5 +61,166 @@
     "skill": "CSS",
     "source_url": "https://developer.mozilla.org/en-US/docs/Learn/CSS",
     "source": "MDN"
+  },
+  {
+    "id": "git_book",
+    "title": "Pro Git book",
+    "skill": "Git",
+    "source_url": "https://git-scm.com/book/en/v2",
+    "source": "Official Git documentation"
+  },
+  {
+    "id": "node_learn",
+    "title": "Learn Node.js",
+    "skill": "Node.js",
+    "source_url": "https://nodejs.org/en/learn",
+    "source": "Official Node.js documentation"
+  },
+  {
+    "id": "rest_http",
+    "title": "HTTP and REST fundamentals",
+    "skill": "REST APIs",
+    "source_url": "https://developer.mozilla.org/en-US/docs/Web/HTTP",
+    "source": "MDN"
+  },
+  {
+    "id": "fastapi_tutorial",
+    "title": "FastAPI Tutorial",
+    "skill": "FastAPI",
+    "source_url": "https://fastapi.tiangolo.com/tutorial/",
+    "source": "Official FastAPI documentation"
+  },
+  {
+    "id": "sql_lite",
+    "title": "SQL As Understood By SQLite",
+    "skill": "SQL",
+    "source_url": "https://www.sqlite.org/lang.html",
+    "source": "SQLite documentation"
+  },
+  {
+    "id": "postgres_tutorial",
+    "title": "PostgreSQL Tutorial",
+    "skill": "PostgreSQL",
+    "source_url": "https://www.postgresql.org/docs/current/tutorial.html",
+    "source": "Official PostgreSQL documentation"
+  },
+  {
+    "id": "docker_start",
+    "title": "Docker Get Started",
+    "skill": "Docker",
+    "source_url": "https://docs.docker.com/get-started/",
+    "source": "Official Docker documentation"
+  },
+  {
+    "id": "pandas_start",
+    "title": "Getting started with pandas",
+    "skill": "Pandas",
+    "source_url": "https://pandas.pydata.org/docs/getting_started/index.html",
+    "source": "Official pandas documentation"
+  },
+  {
+    "id": "excel_help",
+    "title": "Excel help and learning",
+    "skill": "Excel",
+    "source_url": "https://support.microsoft.com/en-us/excel",
+    "source": "Microsoft Support"
+  },
+  {
+    "id": "powerbi_fundamentals",
+    "title": "Power BI fundamentals",
+    "skill": "Power BI",
+    "source_url": "https://learn.microsoft.com/en-us/power-bi/fundamentals/",
+    "source": "Microsoft Learn"
+  },
+  {
+    "id": "figma_help",
+    "title": "Figma Learn",
+    "skill": "Figma",
+    "source_url": "https://help.figma.com/hc/en-us",
+    "source": "Figma Help Center"
+  },
+  {
+    "id": "seo_starter",
+    "title": "SEO Starter Guide",
+    "skill": "SEO",
+    "source_url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+    "source": "Google Search Central"
+  },
+  {
+    "id": "skillshop_ga",
+    "title": "Google Skillshop (Analytics)",
+    "skill": "Google Analytics",
+    "source_url": "https://skillshop.withgoogle.com/",
+    "source": "Google"
+  },
+  {
+    "id": "skillshop_ads",
+    "title": "Google Skillshop (Ads)",
+    "skill": "Google Ads",
+    "source_url": "https://skillshop.withgoogle.com/",
+    "source": "Google"
+  },
+  {
+    "id": "canva_school",
+    "title": "Canva Design School",
+    "skill": "Canva",
+    "source_url": "https://www.canva.com/designschool/",
+    "source": "Canva"
+  },
+  {
+    "id": "atlassian_agile",
+    "title": "Agile Coach",
+    "skill": "Agile",
+    "source_url": "https://www.atlassian.com/agile",
+    "source": "Atlassian"
+  },
+  {
+    "id": "jira_guide",
+    "title": "Jira guides",
+    "skill": "Jira",
+    "source_url": "https://www.atlassian.com/software/jira/guides",
+    "source": "Atlassian"
+  },
+  {
+    "id": "selenium_docs",
+    "title": "Selenium documentation",
+    "skill": "Selenium",
+    "source_url": "https://www.selenium.dev/documentation/",
+    "source": "Official Selenium documentation"
+  },
+  {
+    "id": "flutter_start",
+    "title": "Get started with Flutter",
+    "skill": "Flutter",
+    "source_url": "https://docs.flutter.dev/get-started",
+    "source": "Official Flutter documentation"
+  },
+  {
+    "id": "dart_lang",
+    "title": "Dart language tour",
+    "skill": "Dart",
+    "source_url": "https://dart.dev/language",
+    "source": "Official Dart documentation"
+  },
+  {
+    "id": "firebase_docs",
+    "title": "Firebase documentation",
+    "skill": "Firebase",
+    "source_url": "https://firebase.google.com/docs",
+    "source": "Official Firebase documentation"
+  },
+  {
+    "id": "wordpress_learn",
+    "title": "Learn WordPress",
+    "skill": "WordPress",
+    "source_url": "https://learn.wordpress.org/",
+    "source": "WordPress.org"
+  },
+  {
+    "id": "gsheets_help",
+    "title": "Google Sheets help",
+    "skill": "Google Sheets",
+    "source_url": "https://support.google.com/docs/topic/9054603",
+    "source": "Google"
   }
 ]

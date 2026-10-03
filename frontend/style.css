@@ -363,3 +363,57 @@ b { font-weight: 700; }
   .theme-toggle { min-height: 38px; padding: 7px 9px; font-size: 12px; }
   .steps { grid-template-columns: 1fr; gap: 18px; }
 }
+
+
+/* ============ v2 ADDITIONS ============ */
+button.nav-item { display: block; width: 100%; text-align: left; background: none; border: none; font: inherit; font-size: 14.5px; }
+.nav-item:focus-visible, .qa:focus-visible, .btn-primary:focus-visible, .btn-ghost:focus-visible,
+.theme-toggle:focus-visible, .link-btn:focus-visible, .dropzone:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+.side-footer { display: flex; flex-direction: column; gap: 8px; }
+.btn-ghost.danger:hover { border-color: var(--bad); color: var(--bad); }
+.btn-primary:disabled, .btn-ghost:disabled { opacity: .6; cursor: progress; transform: none; }
+.link-btn { background: none; border: none; padding: 0; font: inherit; color: var(--purple); font-weight: 600; cursor: pointer; text-decoration: underline; }
+.notice { margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; background: #fff7e6; color: #8a5a00; border: 1px solid #f6dfae; font-size: 14px; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.small-note { margin-top: 10px; font-size: 13px; }
+.gap-col .small-note { margin: 0 0 10px; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.plan-item.done h5, .plan-item.done p { opacity: .65; }
+.plan-item.done h5 { text-decoration: line-through; }
+.job-card.targeted { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(106, 76, 255, .18); }
+.fill, .match-fill { width: 0; transition: width .4s ease; }
+.feedback-text { margin-top: 12px; }
+.feedback .btn-primary { margin-top: 16px; }
+:root[data-theme="dark"] .notice { background: #3a2f17; color: #ffd58a; border-color: #5a4720; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media (max-width: 900px) {
+  .side-footer { flex-direction: row; padding-top: 10px; }
+  .side-footer .btn-ghost.sm { width: auto; flex: 1; }
+  button.nav-item { width: auto; white-space: nowrap; }
+}
+@media (max-width: 600px) {
+  .topbar { flex-wrap: wrap; gap: 10px; padding: 14px 16px; }
+  .topbar-right { gap: 8px; }
+  .theme-toggle [data-theme-label] { display: none; }
+}
+
+/* ============ v2.1 personalised roles ============ */
+.job-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0 6px; }
+.inline-form label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 6px; }
+.inline-row { display: flex; gap: 8px; }
+.inline-row input { flex: 1; min-width: 0; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font: inherit; font-size: 14px; background: var(--card); color: var(--text); }
+.inline-row input:focus { outline: none; border-color: var(--purple); }
+.inline-row button { white-space: nowrap; }
+.source-badge { display: inline-block; margin-bottom: 6px; padding: 3px 9px; border-radius: 100px; font-size: 11.5px; font-weight: 600; background: #eef0f7; color: var(--muted); }
+.source-badge.ai { background: #ede9ff; color: var(--purple); }
+.source-badge.custom { background: #e8f8ee; color: var(--ok); }
+.job-desc { margin: 10px 0 0; font-size: 14px; color: var(--text); }
+.target-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 16px; padding: 10px 14px; border-radius: 10px; background: #f3f1ff; font-size: 14px; }
+:root[data-theme="dark"] .target-bar { background: #2a2540; }
+:root[data-theme="dark"] .source-badge { background: #2b2f3d; }
+:root[data-theme="dark"] .source-badge.ai { background: #30294b; color: #c2b4ff; }
+:root[data-theme="dark"] .source-badge.custom { background: #1d3a30; color: #78e2a4; }
+:root[data-theme="dark"] .inline-row input { border-color: #3a3f52; }
+@media (max-width: 900px) { .job-controls { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .inline-row { flex-direction: column; } }
